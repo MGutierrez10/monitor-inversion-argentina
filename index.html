@@ -137,6 +137,8 @@ td.num{white-space:nowrap}
 .wtip{position:absolute;pointer-events:none;background:var(--panel);color:var(--fg);border:1px solid var(--line2);border-radius:8px;padding:6px 10px;font-size:12.5px;line-height:1.35;box-shadow:var(--shadow);white-space:nowrap;z-index:3}
 .wtip b{display:block;font-family:var(--f-head);font-size:13px}
 .wleg{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:10px;font-size:12px;color:var(--muted)}
+.wleg .lg{display:inline-flex;align-items:center;gap:8px}
+.wleg .lg i{width:120px;height:8px;border-radius:4px;display:inline-block}
 .wleg b{color:var(--fg);font-weight:600;margin-right:4px}
 .wleg .sw{display:inline-flex;align-items:center;gap:4px}
 .wleg .sw i{width:14px;height:10px;border-radius:2px;display:inline-block}
@@ -411,7 +413,7 @@ td.num{white-space:nowrap}
     <div class="shead"><span class="eyebrow">FMI y BCRA</span><h2>Mundo</h2><p class="note" id="wSub">Principales variables económicas de cada país. Pasá el mouse o tocá un país para ver sus principales datos, cuánto invirtió en Argentina y cómo es su agencia de promoción de inversiones.</p></div>
     <div class="panel wide">
       <div class="wctl">
-        <div class="cg"><span class="cl">Colorear el mapa por</span><div class="seg" role="group" aria-label="Variable del mapa" id="wVars"></div></div>
+        <div class="cg"><span class="cl">Ver el mapa por</span><div class="seg" role="group" aria-label="Variable del mapa" id="wVars"></div></div>
         <div class="cg"><label class="cl" for="wPais">Buscar país</label><select id="wPais"></select></div>
       </div>
       <div class="wgrid">
@@ -814,6 +816,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
       if(r[0]===li){o.stock+=r[3];o.fq+=r[6]} if(Q[r[0]].startsWith(lastFull))o.fy+=r[6];});})();
   const wval=(i,k)=>k==='ied'?(WIED[i]?WIED[i].stock:null):k==='api'?apVal(i):((MW.paises[i]||{})[k]);
   const WV=[
+    ['gen','General',null,'',0],
     ['pbi_usd','PBI',v=>v>=1000?`USD ${nf(v/1000,1)} billones`:`USD ${nf(v,v<10?1:0)} mil millones`,'PBI (USD miles de millones)',0],
     ['crec','Crecimiento',v=>`${nf(v,1)}%`,'Crecimiento real (%)',1],
     ['infl','Inflación',v=>`${nf(v,1)}%`,'Inflación promedio (%)',1],
@@ -822,7 +825,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
     ['ied','IED en Argentina',v=>`USD ${nf(v,0)} M de stock`,'Stock de IED en Argentina (USD M)',0],
     ['api','Agencias',v=>`agencia con ${v} de 11 servicios`,'Agencia de promoción: servicios que ofrece (de 11)',0],
   ];
-  let wv='pbi_usd', wSel=null, wReady=false;
+  let wv='gen', wSel=null, wReady=false;
   const wName=i=>(MG&&MG.nm[i])||(MG&&MG.p[i]&&MG.p[i].n)||i;
   function wColors(){
     const lo=css('--wlo')||'#dce8f7', hi=css('--c1');
@@ -839,13 +842,13 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
     return {div:false,th:[1,2,3,4,5,6].map(i=>q(i/7))};
   }
   function wFill(v,B,C){if(v==null)return null;
-    if(B.div){if(v<B.th[0])return C.neg[1];if(v<=0&&B.ied)return C.neg[0];if(v<0)return C.neg[0];let i=1;while(i<5&&v>=B.th[i+1])i++;return C.seq[i+1]}
+    if(B.div){if(B.ied&&v<=0)return C.neg[0];if(v<0)return C.neg[1];let i=1;while(i<5&&v>=B.th[i+1])i++;return C.seq[i+1]}
     let i=0;while(i<6&&v>=B.th[i])i++;return C.seq[i];}
   function wRank(i,key){const arr=wAll(key).sort((a,b)=>b[1]-a[1]);const k=arr.findIndex(x=>x[0]===i);return k<0?null:[k+1,arr.length]}
   function wCardFor(i){
     const el=document.getElementById('wCard');
     if(!i){el.innerHTML='<div class="wempty">Pasá el mouse o tocá un país del mapa para ver sus datos.</div>';wAgFor(null);return}
-    const P=MW.paises[i]||{}, vd=WV.find(v=>v[0]===wv), r=wv==='api'?null:wRank(i,wv);
+    const P=MW.paises[i]||{}, vd=WV.find(v=>v[0]===wv), r=wv==='api'||wv==='gen'?null:wRank(i,wv);
     const rk=r?`Puesto ${r[0]} de ${r[1]} en ${vd[1]} (de mayor a menor)`:'';
     const val=(v,d,k)=>`<td class="r num"${v<0?' style="color:var(--neg)"':''}>${v!=null?nf(v,k==='pbi_usd'&&v<10?1:d):'–'}</td>`;
     const I=WIED[i];
@@ -853,7 +856,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
       (I?[['Stock al '+qL(wQ)+' (USD M)',I.stock,'ied'],['Flujo '+qL(wQ)+' (USD M)',I.fq]].map(([l,v,k])=>`<tr class="${k===wv?'on':''}"><td>${l}</td>${val(v,1)}</tr>`).join('')
          :`<tr><td colspan="2" class="note">Sin inversiones registradas por el BCRA con origen en este país.</td></tr>`);
     el.innerHTML=`<h3>${wName(i)}</h3>${rk?`<div class="rk">${rk}</div>`:''}<table><tbody><tr class="sec"><td colspan="2">Economía · ${MW.anio} (FMI)</td></tr>`+
-      WV.filter(v=>v[0]!=='ied'&&v[0]!=='api').map(([k,,,l,d])=>`<tr class="${k===wv?'on':''}"><td>${l}</td>${val(P[k],d,k)}</tr>`).join('')+ied+'</tbody></table>';
+      WV.filter(v=>!['gen','ied','api'].includes(v[0])).map(([k,,,l,d])=>`<tr class="${k===wv?'on':''}"><td>${l}</td>${val(P[k],d,k)}</tr>`).join('')+ied+'</tbody></table>';
     wAgFor(i);
   }
   function wSetup(){
@@ -871,7 +874,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
     svg.addEventListener('pointermove',e=>{const t=e.target.closest('path');if(!t){tip.hidden=true;return}
       const i=t.dataset.i; if(hov!==t){hov&&hov.classList.remove('hov');hov=t;t.classList.add('hov');t.parentNode.appendChild(t)}
       const v=wval(i,wv), vd=WV.find(x=>x[0]===wv);
-      tip.innerHTML=`<b>${wName(i)}</b>${vd[1]}: ${v!=null?vd[2](v):'sin dato'}`; tip.hidden=false;
+      tip.innerHTML=wv==='gen'?`<b>${wName(i)}</b>`:`<b>${wName(i)}</b>${vd[1]}: ${v!=null?vd[2](v):'sin dato'}`; tip.hidden=false;
       const r=box.getBoundingClientRect(); let x=e.clientX-r.left+14, y=e.clientY-r.top+14;
       if(x+tip.offsetWidth>r.width-4)x=e.clientX-r.left-tip.offsetWidth-14; if(y+tip.offsetHeight>r.height-4)y=e.clientY-r.top-tip.offsetHeight-14;
       tip.style.left=x+'px'; tip.style.top=y+'px';
@@ -886,18 +889,24 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
     wCardFor(i);}
   function drawMundo(){
     if(!wReady){wSetup();if(!wReady)return}
-    const B=wBins(wv), C=wColors(), vd=WV.find(x=>x[0]===wv);
+    const C=wColors(), vd=WV.find(x=>x[0]===wv), leg=document.getElementById('wLeg');
+    if(wv==='gen'){
+      document.querySelectorAll('#wSvg path').forEach(p=>{p.style.fill=C.seq[4];p.classList.remove('nd')});
+      leg.innerHTML=''; leg.hidden=true; wCardFor(wSel); return;
+    }
+    const B=wBins(wv);
     document.querySelectorAll('#wSvg path').forEach(p=>{const i=p.dataset.i;const v=wv==='ied'&&i==='ARG'?null:wval(i,wv);const f=wFill(v,B,C);
       if(f){p.style.fill=f;p.classList.remove('nd')}else{p.style.fill='';p.classList.add('nd')}});
-    const dd=vd[4], fmt=v=>nf(v,Math.abs(v)<10&&dd===0?1:dd);
-    let leg;
-    if(B.fixed)leg=C.seq.map((c,k)=>[c,k===0?'3 o menos':k===6?'9 o más':`${B.th[k-1]+1}`]);
-    else if(B.ied)leg=[[C.neg[0],'0 o negativo'],...[1,2,3,4].map(k=>[C.seq[k+1],`${fmt(Math.max(0,B.th[k]))} a ${fmt(B.th[k+1])}`]),[C.seq[6],`> ${fmt(B.th[5])}`]];
-    else if(B.div)leg=[[C.neg[1],`< ${fmt(B.th[0])}`],[C.neg[0],`${fmt(B.th[0])} a 0`],...[1,2,3,4].map(k=>[C.seq[k+1],`${fmt(Math.max(0,B.th[k]))} a ${fmt(B.th[k+1])}`]),[C.seq[6],`> ${fmt(B.th[5])}`]];
-    else leg=C.seq.map((c,k)=>[c,k===0?`< ${fmt(B.th[0])}`:k===6?`> ${fmt(B.th[5])}`:`${fmt(B.th[k-1])} a ${fmt(B.th[k])}`]);
-    document.getElementById('wLeg').innerHTML=`<b>${wv==='ied'?`Stock de IED en Argentina al ${qL(wQ)} (USD M)`:vd[3]}</b>`+leg.map(([c,l])=>`<span class="sw"><i style="background:${c}"></i>${l}</span>`).join('')+`<span class="sw"><i style="background:repeating-linear-gradient(45deg,var(--line2) 0 1.5px,var(--sunk) 1.5px 4px)"></i>${wv==='ied'?'sin inversión registrada':wv==='api'?'sin agencia relevada':'sin dato'}</span>`;
+    const grad=`linear-gradient(90deg,${C.seq[0]},${C.seq[3]},${C.seq[6]})`;
+    const extra=[];
+    if(wv==='crec')extra.push(`<span class="sw"><i style="background:${C.neg[1]}"></i>cae</span>`);
+    if(wv==='ied')extra.push(`<span class="sw"><i style="background:${C.neg[0]}"></i>cero o negativo</span>`);
+    const nd=wv==='ied'?'sin inversión registrada':wv==='api'?'sin agencia relevada':'sin dato';
+    leg.hidden=false;
+    leg.innerHTML=`<span class="lg">menos<i style="background:${grad}"></i>más</span>`+extra.join('')+`<span class="sw"><i style="background:repeating-linear-gradient(45deg,var(--line2) 0 1.5px,var(--sunk) 1.5px 4px)"></i>${nd}</span>`;
     wCardFor(wSel);
   }
+
 
   // ---------- Agencias de promoción de inversiones
   const AP=(D.apis&&D.apis.agencias)||[];
