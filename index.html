@@ -468,7 +468,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
       ds=[{type:'bar',label:VARS[med][iv],data:d,backgroundColor:d.map(v=>v<0?css('--neg'):c[0]),borderRadius:4}];}
     mk('cIED',{data:{labels,datasets:ds},options:o});
     // KPIs de la selección
-    const tot=series(iv), sel=[fP!==''?CU.paises[+fP]:'',fU!==''?CU.subsectores[+fU][1]:fS!==''?CU.sectores[+fS]:''].filter(Boolean).join(' · ')||'Total Argentina';
+    const tot=series(iv), sel=[fP!==''?CU.paises[+fP]:'Todos los países',fU!==''?CU.subsectores[+fU][1]:fS!==''?CU.sectores[+fS]:''].filter(Boolean).join(' · ');
     const K=[];
     if(!pk.length){K.push(['–','sin datos en el período elegido'])}
     else if(med==='flujo'){const s=tot.reduce((a,b)=>a+b,0);
@@ -556,7 +556,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
     const M=[];
     {const p26=D.pbi.find(p=>p.anio===2026),p25=D.pbi.find(p=>p.anio===2025);M.push(['PBI 2026 (estimado)',`USD ${nf(p26.nom)} MM`,`2025: USD ${nf(p25.nom)} MM`]);}
     {const il=D.ipc[D.ipc.length-1];M.push(['Inflación anual',`${nf(il[2],1)}%`,`${mesL(il[0])} · mensual ${nf(il[1],1)}%`]);}
-    if(E.ica){M.push([`Saldo comercial ${mesL(E.ica.periodo)}`,`USD ${nf(E.ica.saldo)} M`,`Exportaciones ${nf(E.ica.expo)} · Importaciones ${nf(E.ica.impo)}`]);
+    if(E.ica){M.push([`Saldo comercial ${mesL(E.ica.periodo)}`,`USD ${nf(E.ica.saldo)} M`,`Exportaciones USD ${nf(E.ica.expo)} M · Importaciones USD ${nf(E.ica.impo)} M`]);
       M.push(['Saldo comercial en el año',`USD ${nf(E.ica.acum.saldo)} M`,`Enero a ${MESL[+E.ica.periodo.slice(5,7)-1]} · exportaciones ${E.ica.acum.expo_ia>=0?'+':''}${nf(E.ica.acum.expo_ia,1)}%`]);}
     if(E.emae)M.push(['Actividad económica',`${nf(E.emae.ia,1)}%`,`${mesL(E.emae.periodo)} vs un año atrás · en el año ${nf(E.emae.acum_ia,1)}%`]);
     if(E.riesgo_pais)M.push(['Riesgo país',`${nf(E.riesgo_pais.valor)} puntos`,`Al ${fdate(E.riesgo_pais.fecha)}`]);
