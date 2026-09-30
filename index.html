@@ -422,7 +422,6 @@ td.num{white-space:nowrap}
         </div>
         <div class="wcard" id="wCard" aria-live="polite"></div>
       </div>
-      <p class="note" id="wNote"></p>
     </div>
   </section>
   </div>
@@ -725,7 +724,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
       ['Comercio, actividad y PBI trimestral',[E.ica,E.emae,E.pib_trim].filter(Boolean).map(x=>`<a href="${x.url}" target="_blank" rel="noopener">${x.fuente}</a>`).join(' · ')],
       ['Riesgo país',E.riesgo_pais?E.riesgo_pais.fuente:'–'],
       ['Pobreza',E.pobreza?`${E.pobreza.fuente}. Porcentaje de personas, por semestre.`:'–'],
-      ['Mundo',D.mundo?`${D.mundo.fuente}, datos de ${D.mundo.anio}; IED por país de origen del BCRA; agencias de promoción: relevamiento propio de PromArgentina${(D.apis||{}).fecha?` al ${D.apis.fecha.split('-').reverse().join('/')}`:''}. Se actualiza cuando el FMI publica una nueva edición (abril y octubre). Mapa: Natural Earth.`:'–'],
+      ['Mundo',D.mundo?`<b>Economía:</b> ${D.mundo.fuente}, año ${D.mundo.anio} (estimaciones); se actualiza cuando el FMI publica una nueva edición (abril y octubre). PBI en dólares corrientes; inflación = variación promedio anual de precios; desempleo = % de la fuerza laboral. Los colores del mapa agrupan a los países en siete tramos de tamaño similar. <b>IED en Argentina:</b> BCRA, cuadro por país de origen (los mismos números de la hoja IED); stock = posición al último trimestre publicado, flujo = transacciones del trimestre. <b>Agencias de promoción de inversiones:</b> relevamiento propio de PromArgentina${(D.apis||{}).fecha?` al ${D.apis.fecha.split('-').reverse().join('/')}`:''}. Mapa: Natural Earth.`:'–'],
       ['PBI per cápita',E.pbi_pc?`${E.pbi_pc.fuente}, en ${E.pbi_pc.unidad}.`:'–']
     ];
     document.getElementById('methods').innerHTML=src.map(s=>`<p><b>${s[0]}.</b> ${s[1]}</p>`).join('')+'<p><b>Actualización.</b> La página se regenera en forma automática los días hábiles. La fecha de arriba indica la última corrida.</p>';
@@ -897,7 +896,6 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
     else if(B.div)leg=[[C.neg[1],`< ${fmt(B.th[0])}`],[C.neg[0],`${fmt(B.th[0])} a 0`],...[1,2,3,4].map(k=>[C.seq[k+1],`${fmt(Math.max(0,B.th[k]))} a ${fmt(B.th[k+1])}`]),[C.seq[6],`> ${fmt(B.th[5])}`]];
     else leg=C.seq.map((c,k)=>[c,k===0?`< ${fmt(B.th[0])}`:k===6?`> ${fmt(B.th[5])}`:`${fmt(B.th[k-1])} a ${fmt(B.th[k])}`]);
     document.getElementById('wLeg').innerHTML=`<b>${wv==='ied'?`Stock de IED en Argentina al ${qL(wQ)} (USD M)`:vd[3]}</b>`+leg.map(([c,l])=>`<span class="sw"><i style="background:${c}"></i>${l}</span>`).join('')+`<span class="sw"><i style="background:repeating-linear-gradient(45deg,var(--line2) 0 1.5px,var(--sunk) 1.5px 4px)"></i>${wv==='ied'?'sin inversión registrada':wv==='api'?'sin agencia relevada':'sin dato'}</span>`;
-    document.getElementById('wNote').textContent=`Economía: ${MW.fuente}, año ${MW.anio} (estimaciones). PBI en dólares corrientes; inflación = variación promedio anual de precios; desempleo = % de la fuerza laboral. IED en Argentina: BCRA, cuadro por país de origen (los mismos números de la hoja IED); stock = posición al último trimestre publicado, flujos = transacciones del período.`;
     wCardFor(wSel);
   }
 
