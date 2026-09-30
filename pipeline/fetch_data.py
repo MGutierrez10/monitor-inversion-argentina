@@ -150,6 +150,35 @@ def _rp():
     return {'ultimo': pts[-1]}
 
 
+# ---------- FMI World Economic Outlook (DataMapper API) para la pestaña Mundo
+FMI_IND = {'pbi_usd': 'NGDPD', 'crec': 'NGDP_RPCH', 'pbi_pc': 'NGDPDPC', 'pbi_pc_ppa': 'PPPPC', 'infl': 'PCPIPCH',
+           'desempleo': 'LUR', 'deuda': 'GGXWDG_NGDP', 'fiscal': 'GGXCNL_NGDP', 'cc': 'BCA_NGDPD', 'pob': 'LP'}
+FMI_ANIO = '2026'
+
+@fuente('fmi_weo')
+def _fmi():
+    base = 'https://www.imf.org/external/datamapper/api/v1/'
+    def j(path):
+        try:
+            return json.loads(get(base + path, timeout=120))
+        except Exception:
+            return json.loads(get(base + path, timeout=120, insecure=True))
+    paises = {}
+    for k, ind in FMI_IND.items():
+        vals = j(f'{ind}?periods={FMI_ANIO}').get('values', {}).get(ind, {})
+        for iso, per in vals.items():
+            v = per.get(FMI_ANIO)
+            if v is not None and len(iso) == 3:
+                paises.setdefault(iso, {})[k] = round(float(v), 3)
+    cs = j('countries').get('countries', {})
+    nombres = {iso: (c or {}).get('label') for iso, c in cs.items()}
+    if len(paises) < 150:
+        raise RuntimeError(f'Pocos países en la respuesta del FMI: {len(paises)}')
+    save('fmi_mundo.json', {'anio': int(FMI_ANIO), 'fuente': 'FMI, World Economic Outlook (DataMapper)', 'descargado': estado['corrida'],
+                            'indicadores': FMI_IND, 'nombres_en': nombres, 'paises': paises})
+    return {'paises': len(paises), 'arg': paises.get('ARG')}
+
+
 save('series.json', series)
 save('estado.json', estado)
 print(json.dumps(estado, ensure_ascii=False, indent=1))
