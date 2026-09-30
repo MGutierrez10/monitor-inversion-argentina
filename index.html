@@ -818,7 +818,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
     const val=(v,d,k)=>`<td class="r num"${v<0?' style="color:var(--neg)"':''}>${v!=null?nf(v,k==='pbi_usd'&&v<10?1:d):'–'}</td>`;
     const I=WIED[i];
     const ied=i==='ARG'?'':`<tr class="sec"><td colspan="2">Inversión extranjera directa en Argentina</td></tr>`+
-      (I?[['Stock al '+qL(wQ)+' (USD M)',I.stock,'ied'],['Flujo '+qL(wQ)+' (USD M)',I.fq],['Flujo año '+wY+' (USD M)',I.fy]].map(([l,v,k])=>`<tr class="${k===wv?'on':''}"><td>${l}</td>${val(v,1)}</tr>`).join('')
+      (I?[['Stock al '+qL(wQ)+' (USD M)',I.stock,'ied'],['Flujo '+qL(wQ)+' (USD M)',I.fq]].map(([l,v,k])=>`<tr class="${k===wv?'on':''}"><td>${l}</td>${val(v,1)}</tr>`).join('')
          :`<tr><td colspan="2" class="note">Sin inversiones registradas por el BCRA con origen en este país.</td></tr>`);
     el.innerHTML=`<h3>${wName(i)}</h3>${rk?`<div class="rk">${rk}</div>`:''}<table><tbody><tr class="sec"><td colspan="2">Economía · ${MW.anio} (FMI)</td></tr>`+
       WV.filter(v=>v[0]!=='ied').map(([k,,,l,d])=>`<tr class="${k===wv?'on':''}"><td>${l}</td>${val(P[k],d,k)}</tr>`).join('')+ied+'</tbody></table>';
