@@ -204,6 +204,18 @@ td.num{white-space:nowrap}
 .sbar .st b:last-child{color:var(--c1);font-size:15px}
 .sbar .tr{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
 .sbar .tr i{display:block;height:100%;border-radius:5px;background:var(--c1)}
+/* Pantalla completa de gráficos */
+.fsrow{display:flex;justify-content:flex-end;margin-top:6px}
+.fsbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--panel);color:var(--muted);border-radius:8px;padding:4px 10px;font:600 12px var(--f-body);cursor:pointer}
+.fsbtn:hover,.fsbtn:focus-visible{color:var(--c1);border-color:var(--c1)}
+.fsbtn svg{width:14px;height:14px}
+.fs-back{position:fixed;inset:0;background:rgba(4,20,50,.6);z-index:2000}
+.panel.full{position:fixed!important;inset:clamp(8px,2vw,24px);z-index:2001;overflow:auto;margin:0!important;box-shadow:0 24px 70px rgba(0,0,0,.4);padding:clamp(14px,2vw,26px)!important;display:block}
+.panel.full .chart{height:calc(100vh - 230px)!important;min-height:340px}
+.panel.full .fsrow{position:sticky;bottom:0}
+.panel.full .wgrid{grid-template-columns:minmax(0,1fr) 360px}
+body.has-full{overflow:hidden}
+@media (max-width:860px){.panel.full .wgrid{grid-template-columns:1fr}}
 /* portada */
 .hero{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(125deg,#041d57 0%,#0a3585 48%,#0f4aa8 100%);color:#fff;border-radius:16px;padding:clamp(24px,4vw,40px);display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:end;box-shadow:0 10px 30px rgba(4,29,87,.18)}
 .hero::before,.hero::after{content:"";position:absolute;z-index:-1;pointer-events:none}
@@ -938,6 +950,23 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
       <div class="chips2">${SV.filter(([k])=>a.s[k]).map(([k,l])=>`<span class="y">✓ ${l}</span>`).join('')||'<span class="note">Sin servicios informados.</span>'}</div>${(()=>{const n=apCount(a),t=SV.length,pc=Math.round(n/t*100);return `<div class="sbar"><div class="st"><b>Ofrece ${n} de ${t} servicios</b><b>${pc}%</b></div><div class="tr"><i style="width:${pc}%"></i></div></div>`})()}</div>`).join('');}
   function wAgFor(i){const el=document.getElementById('wAg');if(!el)return;if(!i){el.innerHTML='';el.hidden=true;return}el.hidden=false;
     el.innerHTML=`<div class="sec2">Agencia de promoción de inversiones · ${wName(i)}</div><div class="agrid">${APBY[i]?apBlock(i):'<div class="ag"><span class="note">Este país no está en el relevamiento de agencias.</span></div>'}</div>`;}
+
+  // ---------- pantalla completa
+  (function(){
+    const ICO_OPEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
+    const ICO_CLOSE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>';
+    let open=null, back=null;
+    function close(){if(!open)return;const {panel,btn}=open;panel.classList.remove('full');document.body.classList.remove('has-full');back&&back.remove();back=null;btn.innerHTML=ICO_OPEN+'Pantalla completa';btn.setAttribute('aria-pressed','false');open=null;setTimeout(()=>{panel.scrollIntoView({block:'center'})},30)}
+    function toggle(panel,btn){if(open){const same=open.panel===panel;close();if(same)return}
+      back=document.createElement('div');back.className='fs-back';back.onclick=close;document.body.appendChild(back);
+      panel.classList.add('full');document.body.classList.add('has-full');btn.innerHTML=ICO_CLOSE+'Cerrar';btn.setAttribute('aria-pressed','true');open={panel,btn};panel.scrollTop=0;}
+    document.querySelectorAll('.chart, .wmap').forEach(el=>{const panel=el.closest('.panel');if(!panel)return;
+      const row=document.createElement('div');row.className='fsrow';const b=document.createElement('button');b.type='button';b.className='fsbtn';b.innerHTML=ICO_OPEN+'Pantalla completa';b.setAttribute('aria-pressed','false');
+      b.onclick=()=>toggle(panel,b);row.appendChild(b);
+      const anchor=el.classList.contains('wmap')?(document.getElementById('wLeg')||el):el; anchor.insertAdjacentElement('afterend',row);});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+    document.querySelectorAll('.tabs [role=tab]').forEach(t=>t.addEventListener('click',close));
+  })();
 
   // ---------- hojas
   const TABS=['portada','ctx','ied','rigi','mundo','notas'];
