@@ -115,12 +115,15 @@ td.num{white-space:nowrap}
 .pivot td,.pivot th{white-space:nowrap}
 .pivot .stick{position:sticky;left:0;background:var(--panel);z-index:1;max-width:280px;overflow:hidden;text-overflow:ellipsis}
 .pivot th.stick{background:var(--sunk);z-index:2}
-.pivot .s1{width:200px;min-width:200px;max-width:200px;white-space:normal;font-weight:600}
-.pivot .s2{left:200px;max-width:320px;white-space:normal;box-shadow:inset -1px 0 0 var(--line)}
+.pivot tr.grp td{font-weight:700;border-top:1px solid var(--line)}
+.pivot.grpd .stick{width:360px;min-width:360px;max-width:360px;white-space:normal}
+.pivot .tg{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-right:8px;border:1px solid var(--muted);border-radius:2px;font:600 11px/1 var(--f-body);color:var(--muted);vertical-align:-2px}
+.pivot tr.sub td.stick{padding-left:36px;font-weight:400}
+.pivot tr.sub[hidden]{display:none}
 .pivot tbody tr:nth-child(even) td.stick{background:var(--panel)}
 .pivot tr.tot td{background:color-mix(in srgb,var(--c1) 8%,var(--panel));font-weight:600}
-.pivot tr.clk{cursor:pointer}
-.pivot tr.clk:hover td,.pivot tr.clk:focus td{background:color-mix(in srgb,var(--c1) 6%,var(--panel))}
+.pivot tr.clk,.pivot tr.grp{cursor:pointer}
+.pivot tr.clk:hover td,.pivot tr.clk:focus td,.pivot tr.grp:hover td,.pivot tr.grp:focus td{background:color-mix(in srgb,var(--c1) 6%,var(--panel))}
 /* portada */
 .hero{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(125deg,#041d57 0%,#0a3585 48%,#0f4aa8 100%);color:#fff;border-radius:16px;padding:clamp(24px,4vw,40px);display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:end;box-shadow:0 10px 30px rgba(4,29,87,.18)}
 .hero::before,.hero::after{content:"";position:absolute;z-index:-1;pointer-events:none}
@@ -455,6 +458,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
   document.getElementById('iClear').onclick=()=>{fP=fS=fU='';fillSel();drawIED()};
   const keyOf=(q)=>colF==='q'?q:q.slice(0,4);
   const labOf=(k)=>colF==='q'?qL(k):k;
+  const OPEN=new Set();
   function drawIED(){
     const Qin=CU.trimestres.map((q,i)=>[q,i]).filter(([q])=>inQ(q));
     const qset=new Set(Qin.map(x=>x[1]));
@@ -512,13 +516,26 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
     const cell=v=>`<td class="r num"${v<0?' style="color:var(--neg)"':''}>${v?nf(v,1):'–'}</td>`;
     document.getElementById('pvTitle').textContent=`${VARS[med][iv]} por ${dimName.toLowerCase()} · USD M`;
     const two=fila==='sub';
-    const secOf=k=>CU.sectores[SUB2SEC[k]];
-    if(two)R.sort((a,b)=>secOf(a[0]).localeCompare(secOf(b[0]),'es')||b[2]-a[2]);
-    document.getElementById('tPivot').innerHTML=`<thead><tr>${two?'<th class="stick s1">Sector</th><th class="stick s2">Subsector</th>':`<th class="stick">${dimName}</th>`}${pk.map(p=>`<th class="r">${labOf(p)}</th>`).join('')}<th class="r">${endLab}</th><th class="r">%</th></tr></thead><tbody>`+
-      `<tr class="tot">${two?'<td class="stick s1"><b>Total selección</b></td><td class="stick s2"></td>':'<td class="stick"><b>Total selección</b></td>'}${pk.map(p=>cell(totRow[p])).join('')}${cell(endV(totRow))}<td class="r num">100</td></tr>`+
-      R.map(([k,o,e],i)=>`<tr class="clk" data-k="${k}" tabindex="0">${two?`<td class="stick s1">${i===0||secOf(R[i-1][0])!==secOf(k)?secOf(k):''}</td><td class="stick s2">${nameOf(k)}</td>`:`<td class="stick">${nameOf(k)}</td>`}${pk.map(p=>cell(o[p]||0)).join('')}${cell(e)}<td class="r num">${endV(totRow)?nf(e/endV(totRow)*100,1):'–'}</td></tr>`).join('')+'</tbody>';
+    const head=`<thead><tr><th class="stick">${two?'Sector / subsector':dimName}</th>${pk.map(p=>`<th class="r">${labOf(p)}</th>`).join('')}<th class="r">${endLab}</th><th class="r">%</th></tr></thead><tbody>`;
+    const totE=endV(totRow);
+    const line=(cls,attrs,label,o,e)=>`<tr class="${cls}" ${attrs}><td class="stick">${label}</td>${pk.map(p=>cell(o[p]||0)).join('')}${cell(e)}<td class="r num">${totE?nf(e/totE*100,1):'–'}</td></tr>`;
+    let body='';
+    if(two){
+      const G={}; R.forEach(x=>{const g=SUB2SEC[x[0]];(G[g]=G[g]||{o:{},e:0,rows:[]}).rows.push(x);pk.forEach(p=>G[g].o[p]=(G[g].o[p]||0)+(x[1][p]||0));G[g].e+=x[2]});
+      const gs=Object.entries(G).sort((a,b)=>b[1].e-a[1].e);
+      if(gs.length===1)OPEN.add(+gs[0][0]);
+      body=gs.map(([g,v])=>{const op=OPEN.has(+g);
+        return line('grp',`data-g="${g}" tabindex="0" aria-expanded="${op}"`,`<span class="tg">${op?'−':'+'}</span>${CU.sectores[+g]}`,v.o,v.e)+
+          v.rows.map(([k,o,e])=>line('clk sub',`data-k="${k}" data-pg="${g}" tabindex="0"${op?'':' hidden'}`,nameOf(k),o,e)).join('')}).join('');
+    }else body=R.map(([k,o,e])=>line('clk',`data-k="${k}" tabindex="0"`,nameOf(k),o,e)).join('');
+    document.querySelector('.tbl.pivot').classList.toggle('grpd',two);
+    document.getElementById('tPivot').innerHTML=head+`<tr class="tot"><td class="stick"><b>Total selección</b></td>${pk.map(p=>cell(totRow[p])).join('')}${cell(totE)}<td class="r num">100</td></tr>`+body+'</tbody>';
+    document.querySelectorAll('#tPivot tr.grp').forEach(tr=>{const t=()=>{const g=+tr.dataset.g, op=!OPEN.has(g);
+      op?OPEN.add(g):OPEN.delete(g); tr.setAttribute('aria-expanded',op); tr.querySelector('.tg').textContent=op?'−':'+';
+      document.querySelectorAll(`#tPivot tr.sub[data-pg="${g}"]`).forEach(r=>r.hidden=!op)};
+      tr.onclick=t; tr.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t()}}});
     document.querySelectorAll('#tPivot tr.clk').forEach(tr=>{const go=()=>{const k=tr.dataset.k;
-      if(fila==='pais'){fP=k;fila='sec'}else if(fila==='sec'){fS=k;fU='';fila='sub'}else{fU=k;fS=String(SUB2SEC[+k])}
+      if(fila==='pais'){fP=k;fila='sec'}else if(fila==='sec'){fS=k;fU='';fila='sub';OPEN.add(+k)}else{fU=k;fS=String(SUB2SEC[+k])}
       document.querySelectorAll('[data-fila]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.fila===fila));fillSel();drawIED()};
       tr.onclick=go; tr.onkeydown=e=>{if(e.key==='Enter')go()}});
     const sc=document.querySelector('.tbl.pivot'); sc.scrollLeft=sc.scrollWidth;
