@@ -186,6 +186,19 @@ td.num{white-space:nowrap}
 .chips2{display:flex;flex-wrap:wrap;gap:5px}
 .chips2 span{font-size:12.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line2);color:var(--faint)}
 .chips2 span.y{background:color-mix(in srgb,var(--c1) 12%,var(--panel));border-color:color-mix(in srgb,var(--c1) 40%,var(--panel));color:var(--fg)}
+/* Mundo: más contraste en fichas */
+.wcard h3{font-size:21px;font-weight:800;color:var(--c1)}
+.wcard td:first-child{color:var(--fg)!important;font-weight:600}
+.wcard td.num{font:700 15px var(--f-head);color:var(--fg)}
+.wcard tr.on td{background:color-mix(in srgb,var(--c1) 8%,var(--panel))}
+.wcard tr.sec td{color:var(--c1)!important;font-weight:700!important}
+.wag .sec2{color:var(--c1)!important;font-weight:700!important}
+.wag .ag h4{font-size:17px}
+.wag .ag .nm{color:var(--fg)!important;font-weight:500}
+.wag .ag dl{font-size:13.5px!important}
+.wag .ag dt{color:var(--fg)!important;font-weight:600}
+.wag .ag dd{font-weight:500}
+.chips2 span.y{font-weight:600}
 /* portada */
 .hero{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(125deg,#041d57 0%,#0a3585 48%,#0f4aa8 100%);color:#fff;border-radius:16px;padding:clamp(24px,4vw,40px);display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:end;box-shadow:0 10px 30px rgba(4,29,87,.18)}
 .hero::before,.hero::after{content:"";position:absolute;z-index:-1;pointer-events:none}
