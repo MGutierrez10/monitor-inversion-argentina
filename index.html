@@ -157,16 +157,17 @@ td.num{white-space:nowrap}
 @media (max-width:860px){.wgrid{grid-template-columns:1fr}}
 .h4{font:600 14px var(--f-head);margin:0 0 8px}
 .apitbl{max-height:640px}
-.apitbl td,.apitbl th{padding:6px 7px;font-size:12.5px}
+.apitbl td,.apitbl th{padding:6px 4px;font-size:12.5px}
 .apitbl td{vertical-align:middle}
-.apitbl th.v{text-transform:none;letter-spacing:0;font-size:11.5px;line-height:1.25;white-space:normal;vertical-align:bottom;text-align:center;min-width:74px;padding:8px 5px}
-.apitbl th.v .pc{display:block;font:700 17px var(--f-head);color:var(--fg);margin-top:6px}
-.apitbl th.v .bar{display:block;height:6px;border-radius:3px;background:var(--line);margin:4px 2px 0;overflow:hidden}
-.apitbl th.v .bar i{display:block;height:100%;background:var(--c1)}
+.apitbl th.v{text-transform:none;letter-spacing:0;font-size:11.5px;line-height:1.25;white-space:normal;vertical-align:bottom;text-align:center;min-width:52px;padding:8px 2px}
 .apitbl td.c{font-size:14px}
 .apitbl td.c{text-align:center;color:var(--c1);font-weight:700}
 .apitbl td.c.no{color:var(--faint);font-weight:400}
-.apitbl .stick{position:sticky;left:0;background:var(--panel);z-index:1;min-width:150px;max-width:190px;white-space:normal}
+.apitbl .stick{position:sticky;left:0;background:var(--panel);z-index:1;min-width:110px;max-width:140px;white-space:normal;font-weight:600}
+.apitbl td.rgn{color:var(--muted);font-size:12px;width:84px;min-width:84px;white-space:normal}
+.apitbl td.ag{max-width:118px;white-space:normal}
+.apitbl tr.rg td{border-top:2px solid var(--line2)}
+.apitbl tbody tr:nth-child(even) td{background:none}
 .apitbl th.stick{background:var(--sunk);z-index:2}
 .apitbl tr.pa td{background:color-mix(in srgb,var(--c3) 16%,var(--panel))!important;font-weight:600}
 .apitbl tbody tr{cursor:pointer}
@@ -420,10 +421,10 @@ td.num{white-space:nowrap}
       <p class="note" id="wNote"></p>
     </div>
     <div class="panel wide" id="apis">
-      <div class="ph"><div><h3>Agencias de promoción de inversiones: servicios que ofrecen</h3><p class="note" id="apiSub" style="margin:2px 0 0"></p></div>
+      <div class="ph"><div><h3>Agencias de promoción de inversiones por país</h3><p class="note" id="apiSub" style="margin:2px 0 0"></p></div>
         <div class="row"><label class="note" for="aReg">Región</label><select id="aReg"></select><label class="note" for="aServ">Ofrece</label><select id="aServ"></select></div></div>
       <div class="tbl apitbl"><table id="tApi"></table></div>
-      <p class="note">Arriba de cada servicio: porcentaje de las agencias mostradas (sin contar PromArgentina) que lo ofrece. ✓ = lo ofrece; punto gris = no lo ofrece. Tocá una agencia para ver su ficha en el mapa.</p>
+      <p class="note">✓ = la agencia ofrece el servicio. Tocá una fila para ver la ficha del país en el mapa; el nombre de la agencia lleva a su sitio web.</p>
     </div>
   </section>
   </div>
@@ -923,13 +924,15 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
     apTable();
   }
   function apTable(){
-    const L=AP.filter(a=>(!apReg||a.region===apReg)&&(!apServ||a.s[apServ])).sort((a,b)=>(b.promarg-a.promarg)||apCount(b)-apCount(a)||a.sigla.localeCompare(b.sigla));
-    const B=L.filter(a=>!a.promarg), pct=k=>B.length?B.filter(a=>a.s[k]).length/B.length*100:null;
-    const cols=SV.map(x=>[...x,pct(x[0])]).sort((a,b)=>(b[3]??-1)-(a[3]??-1));
-    document.getElementById('tApi').innerHTML=`<thead><tr><th class="stick">Agencia<span class="ps">${B.length} agencias${L.some(a=>a.promarg)?' + PromArgentina':''}</span></th>${cols.map(([k,l,sh,p])=>`<th class="v" title="${l}">${l}<span class="pc">${p==null?'–':nf(p,0)+'%'}</span><span class="bar"><i style="width:${p||0}%"></i></span></th>`).join('')}<th class="r">Total<span class="ps">de 11</span></th></tr></thead><tbody>`+
-      (L.length?L.map(a=>`<tr class="${a.promarg?'pa':''}" data-iso="${a.iso||''}" tabindex="0"><td class="stick">${a.sigla}<span class="ps">${a.iso?wName(a.iso):a.pais}${a.subnacional?` (${a.subnacional})`:''}</span></td>${cols.map(([k])=>`<td class="c${a.s[k]?'':' no'}">${a.s[k]?'✓':a.s[k]===false?'·':'?'}</td>`).join('')}<td class="r num"><b>${apCount(a)}</b></td></tr>`).join(''):`<tr><td colspan="${SV.length+2}" class="note">Ninguna agencia cumple el filtro.</td></tr>`)+'</tbody>';
-    document.querySelectorAll('#tApi tbody tr[data-iso]').forEach(tr=>{const go=()=>{const i=tr.dataset.iso;if(!i)return;wPick(i);document.getElementById('wMap').scrollIntoView({behavior:'smooth',block:'center'})};tr.onclick=go;tr.onkeydown=e=>{if(e.key==='Enter')go()}});
+    const pn=a=>a.iso?wName(a.iso):a.pais;
+    const L=AP.filter(a=>(!apReg||a.region===apReg)&&(!apServ||a.s[apServ])).sort((a,b)=>(a.region||'~').localeCompare(b.region||'~','es')||pn(a).localeCompare(pn(b),'es')||a.sigla.localeCompare(b.sigla));
+    let prev=null;
+    document.getElementById('tApi').innerHTML=`<thead><tr><th>Región</th><th class="stick">País</th><th>Agencia</th>${SV.map(([k,l])=>`<th class="v">${l}</th>`).join('')}</tr></thead><tbody>`+
+      (L.length?L.map(a=>{const rg=a.region!==prev?a.region||'–':'';prev=a.region;
+        return `<tr class="${a.promarg?'pa':''}${rg?' rg':''}" data-iso="${a.iso||''}" tabindex="0"><td class="rgn">${rg}</td><td class="stick">${pn(a)}${a.subnacional?`<span class="ps">${a.subnacional}</span>`:''}</td><td class="ag">${a.web?`<a href="${a.web}" target="_blank" rel="noopener">${a.sigla}</a>`:a.sigla}</td>${SV.map(([k])=>`<td class="c${a.s[k]?'':' no'}">${a.s[k]?'✓':''}</td>`).join('')}</tr>`}).join(''):`<tr><td colspan="${SV.length+3}" class="note">Ninguna agencia cumple el filtro.</td></tr>`)+'</tbody>';
+    document.querySelectorAll('#tApi tbody tr[data-iso]').forEach(tr=>{const go=e=>{if(e&&e.target.closest('a'))return;const i=tr.dataset.iso;if(!i)return;wPick(i);document.getElementById('wMap').scrollIntoView({behavior:'smooth',block:'center'})};tr.onclick=go;tr.onkeydown=e=>{if(e.key==='Enter')go()}});
   }
+
 
 
   // ---------- hojas
