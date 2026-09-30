@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}body{margin:0}</style></head><body><title>Monitor Inversión Argentina</title>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Monitor Inversión Argentina</title><style>[hidden]{display:none!important}body{margin:0}</style></head><body><title>Monitor Inversión Argentina</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;1,700&family=Public+Sans:wght@400;500;600;700&display=swap">
 <style>
@@ -83,9 +83,12 @@ tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--sunk) 60%,transpa
 td.r,th.r{text-align:right}
 td.num{white-space:nowrap}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:12px}
+.mini{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px}
+#ctxKpis{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
 .mini div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;box-shadow:var(--shadow)}
-.mini b{font:700 22px/1.15 var(--f-head)}
+.mini div{border-top:3px solid var(--c1)}
+.mini .t{font:700 13.5px/1.25 var(--f-head);color:var(--fg);letter-spacing:.005em}
+.mini b{font:800 24px/1.15 var(--f-head);color:var(--c1)}
 .mini span{font-size:12.5px;color:var(--muted)}
 .news{display:flex;flex-direction:column;gap:12px}
 .news article{border-left:3px solid var(--c3);padding:2px 0 2px 14px;display:flex;flex-direction:column;gap:3px}
@@ -174,10 +177,9 @@ td.num{white-space:nowrap}
 
   <nav class="tabs" role="tablist" aria-label="Hojas">
     <button role="tab" id="t-portada" data-tab="portada" aria-selected="true">Portada</button>
+    <button role="tab" id="t-ctx" data-tab="ctx" aria-selected="false">Contexto macroeconómico</button>
     <button role="tab" id="t-ied" data-tab="ied" aria-selected="false">IED</button>
-    <button role="tab" id="t-ipc" data-tab="ipc" aria-selected="false">Inflación</button>
     <button role="tab" id="t-rigi" data-tab="rigi" aria-selected="false">RIGI</button>
-    <button role="tab" id="t-ctx" data-tab="ctx" aria-selected="false">Contexto</button>
     <button role="tab" id="t-notas" data-tab="notas" aria-selected="false">Notas y fuentes</button>
   </nav>
 
@@ -247,18 +249,6 @@ td.num{white-space:nowrap}
     </div>
   </section>
   </div>
-  <div class="sheet" id="tab-ipc" role="tabpanel" aria-labelledby="t-ipc" hidden>
-  <!-- IPC -->
-  <section id="ipc">
-    <div class="shead"><span class="eyebrow">Mensual</span><h2>Inflación</h2><p class="note">Índice de precios al consumidor nacional (INDEC), variación mensual e interanual.</p></div>
-    <div class="grid">
-      <div class="panel wide">
-        <div class="chart"><canvas id="cIPC" aria-label="Inflación mensual e interanual"></canvas></div>
-        <p class="note">Barras: variación mensual (eje izquierdo). Línea: variación interanual (eje derecho). Meta del Presupuesto: <span id="ipc-meta"></span>.</p>
-      </div>
-    </div>
-  </section>
-  </div>
   <div class="sheet" id="tab-rigi" role="tabpanel" aria-labelledby="t-rigi" hidden>
   <!-- RIGI -->
   <section id="rigi">
@@ -289,7 +279,7 @@ td.num{white-space:nowrap}
   <div class="sheet" id="tab-ctx" role="tabpanel" aria-labelledby="t-ctx" hidden>
   <!-- Contexto -->
   <section id="contexto">
-    <div class="shead"><span class="eyebrow">Anual y mensual</span><h2>Contexto macro</h2><p class="note">El tamaño de la economía en dólares y las variables que acompañan la decisión de invertir: tipo de cambio, reservas, actividad y comercio exterior.</p></div>
+    <div class="shead"><span class="eyebrow">Anual y mensual</span><h2>Contexto macroeconómico</h2><p class="note">El tamaño de la economía en dólares, la inflación y las variables que acompañan la decisión de invertir: tipo de cambio, reservas, actividad y comercio exterior.</p></div>
     <div class="mini" id="ctxKpis"></div>
     <h3 id="pbi">PBI en dólares</h3>
     <div class="grid">
@@ -309,6 +299,14 @@ td.num{white-space:nowrap}
         <div class="tbl"><table id="tPBI"></table></div>
       </div>
     </div>
+    <h3 id="ipc">Inflación</h3>
+    <div class="grid">
+      <div class="panel wide">
+        <div class="chart"><canvas id="cIPC" aria-label="Inflación mensual e interanual"></canvas></div>
+        <p class="note">Barras: variación mensual (eje izquierdo). Línea: variación interanual (eje derecho). Meta del Presupuesto: <span id="ipc-meta"></span>.</p>
+      </div>
+    </div>
+    <h3>Dólar, reservas y actividad</h3>
     <div class="grid">
       <div class="panel">
         <h3>Tipo de cambio mayorista</h3>
@@ -525,8 +523,8 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
     document.getElementById('rigi-corte').textContent=`Información al ${D.rigi.corte.split('-').reverse().join('/')}.`;
     const by=e=>P.filter(p=>p.estado===e), sum=a=>a.reduce((s,p)=>s+p.monto,0);
     const emp=P.reduce((s,p)=>s+(p.empleo||0),0);
-    const K=[[P.length,'proyectos',`USD ${nf(sum(P))} M`]].concat(EST.map(e=>[by(e).length,e.toLowerCase(),`USD ${nf(sum(by(e)))} M`]));
-    document.getElementById('rigiKpis').innerHTML=K.map(k=>`<div><b>${k[0]}</b><span>${k[1]} · ${k[2]}</span></div>`).join('')+`<div><b>${nf(emp)}</b><span>empleos declarados (constr. + operación)</span></div>`;
+    const K=[['Proyectos presentados',P.length,`USD ${nf(sum(P))} M de inversión`],['Proyectos aprobados',by('Aprobado').length,`USD ${nf(sum(by('Aprobado')))} M`],['En evaluación',by('En Evaluación').length,`USD ${nf(sum(by('En Evaluación')))} M`],['Empleos previstos',nf(emp),'En construcción y operación']];
+    document.getElementById('rigiKpis').innerHTML=K.map(k=>`<div><span class="t">${k[0]}</span><b>${k[1]}</b><span>${k[2]}</span></div>`).join('');
     const fe=document.getElementById('fEstado'), fs=document.getElementById('fSector');
     fe.innerHTML='<option value="">Todos</option>'+EST.map(e=>`<option>${e}</option>`).join('');
     fs.innerHTML='<option value="">Todos</option>'+[...new Set(P.map(p=>p.sector))].sort().map(s=>`<option>${s}</option>`).join('');
@@ -553,16 +551,16 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
 
   // ---------- Contexto
   function drawCtx(){
-    drawPBI();
+    drawPBI(); drawIPC();
     const E=D.extras||{};
     const M=[];
-    {const p26=D.pbi.find(p=>p.anio===2026),p25=D.pbi.find(p=>p.anio===2025);M.push([`USD ${nf(p26.nom)} MM`,`PBI nominal 2026 estimado · 2025: USD ${nf(p25.nom)} MM`]);}
-    if(E.ica){M.push([`USD ${nf(E.ica.saldo)} M`,`saldo comercial ${mes(E.ica.periodo)} · X ${nf(E.ica.expo)} / M ${nf(E.ica.impo)}`]);
-      M.push([`USD ${nf(E.ica.acum.saldo)} M`,`saldo ene–${mes(E.ica.periodo).slice(0,3)} · X ${nf(E.ica.acum.expo_ia,1)}% i.a.`]);}
-    if(E.emae)M.push([`${nf(E.emae.ia,1)}%`,`EMAE ${mes(E.emae.periodo)} i.a. · acum. ${nf(E.emae.acum_ia,1)}%`]);
-    if(E.riesgo_pais)M.push([`${nf(E.riesgo_pais.valor)} pb`,`riesgo país al ${E.riesgo_pais.fecha.split('-').reverse().join('/')}`]);
-    if(E.itcrm)M.push([nf(E.itcrm.valor,1),`ITCRM ${E.itcrm.periodo} (17-12-15=100)`]);
-    document.getElementById('ctxKpis').innerHTML=M.map(m=>`<div><b>${m[0]}</b><span>${m[1]}</span></div>`).join('');
+    {const p26=D.pbi.find(p=>p.anio===2026),p25=D.pbi.find(p=>p.anio===2025);M.push(['PBI 2026 (estimado)',`USD ${nf(p26.nom)} MM`,`2025: USD ${nf(p25.nom)} MM`]);}
+    {const il=D.ipc[D.ipc.length-1];M.push(['Inflación anual',`${nf(il[2],1)}%`,`${mesL(il[0])} · mensual ${nf(il[1],1)}%`]);}
+    if(E.ica){M.push([`Saldo comercial ${mesL(E.ica.periodo)}`,`USD ${nf(E.ica.saldo)} M`,`Exportaciones ${nf(E.ica.expo)} · Importaciones ${nf(E.ica.impo)}`]);
+      M.push(['Saldo comercial en el año',`USD ${nf(E.ica.acum.saldo)} M`,`Enero a ${MESL[+E.ica.periodo.slice(5,7)-1]} · exportaciones ${E.ica.acum.expo_ia>=0?'+':''}${nf(E.ica.acum.expo_ia,1)}%`]);}
+    if(E.emae)M.push(['Actividad económica',`${nf(E.emae.ia,1)}%`,`${mesL(E.emae.periodo)} vs un año atrás · en el año ${nf(E.emae.acum_ia,1)}%`]);
+    if(E.riesgo_pais)M.push(['Riesgo país',`${nf(E.riesgo_pais.valor)} puntos`,`Al ${fdate(E.riesgo_pais.fecha)}`]);
+    document.getElementById('ctxKpis').innerHTML=M.map(m=>`<div><span class="t">${m[0]}</span><b>${m[1]}</b><span>${m[2]}</span></div>`).join('');
     // TC
     const TK=Object.keys(D.tc).sort().filter(inM);
     const last=Object.keys(D.tc).sort().pop(); const lv=D.tc[last];
@@ -628,7 +626,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
       {tab:'ctx',l:'PBI 2026 estimado',v:`USD ${nf(p26.nom)} MM`,c:`${dl((p26.nom/p25.nom-1>=0?'+':'')+nf((p26.nom/p25.nom-1)*100,1)+'%',p26.nom>=p25.nom)} vs 2025 en dólares corrientes`,sp:['spPBI',P.map(p=>p.anio),P.map(p=>p.nom),css('--c1'),'bar']},
       {tab:'ied',l:'IED · últimos 4 trimestres',v:`USD ${nf(f4)} M`,c:`${dl((f4-p4>=0?'+':'')+nf(f4-p4),f4>=p4)} vs 4 trimestres previos · ${qL(l4[0])}–${qL(l4[3])}`,sp:['spIED',FQ.slice(-16),FQ.slice(-16).map(q=>D.ied.flujo_total[q].tot),css('--c1'),'bar']},
       {tab:'ied',l:'Stock de IED',v:`USD ${nf(D.ied.stock_total[sq].pos/1000,1)} MM`,c:`${dl((D.ied.stock_total[sq].pos>=D.ied.stock_total[sPrev].pos?'+':'')+nf((D.ied.stock_total[sq].pos/D.ied.stock_total[sPrev].pos-1)*100,1)+'%',D.ied.stock_total[sq].pos>=D.ied.stock_total[sPrev].pos)} interanual · al ${qL(sq)}`,sp:['spStock',SQ,SQ.map(q=>D.ied.stock_total[q].pos),css('--c2')]},
-      {tab:'ipc',l:'Inflación interanual',v:`${nf(il[2],1)}%`,c:`${dl(nf(il[1],1)+'% mensual',il[1]<=2)} ${mesL(il[0])} · hace un año: ${nf(i12[2],1)}%`,sp:['spIPC',I.slice(-36).map(r=>r[0]),I.slice(-36).map(r=>r[2]),css('--neg')]},
+      {tab:'ctx',l:'Inflación interanual',v:`${nf(il[2],1)}%`,c:`${dl(nf(il[1],1)+'% mensual',il[1]<=2)} ${mesL(il[0])} · hace un año: ${nf(i12[2],1)}%`,sp:['spIPC',I.slice(-36).map(r=>r[0]),I.slice(-36).map(r=>r[2]),css('--neg')]},
       {tab:'rigi',l:'RIGI · inversión comprometida',v:`USD ${nf(rT/1000,1)} MM`,c:`${ap.length} aprobados · ${RG.filter(p=>p.estado!=='Aprobado').length} en proceso · ${nf(RG.reduce((s,p)=>s+(p.empleo||0),0))} empleos`,sp:null},
       {tab:'ctx',l:'Reservas brutas',v:`USD ${nf(D.reservas[rl]/1000,1)} MM`,c:`${dl((D.reservas[rl]>=D.reservas[r12]?'+':'')+nf((D.reservas[rl]-D.reservas[r12])/1000,1)+' MM',D.reservas[rl]>=D.reservas[r12])} en 12 meses · fin de ${mes(rl)}`,sp:['spRes',RK.slice(-36),RK.slice(-36).map(k=>D.reservas[k]),css('--c2')]}
     ];
@@ -647,7 +645,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
     const E=D.extras||{};
     const up=v=>v>=0?'creció':'cayó';
     const items=[];
-    items.push({o:il[0]+'-28',tab:'ipc',cat:'Inflación',k:'--neg',d:cap1(mesL(il[0])),t:`La inflación fue de ${nf(il[1],1)}% en ${MESL[+il[0].slice(5,7)-1]}`,x:`En los últimos 12 meses los precios subieron ${nf(il[2],1)}%. El Presupuesto espera cerrar 2026 en ${nf(D.presupuesto.ipc_dic['2026'],0)}%.`,s:'INDEC'});
+    items.push({o:il[0]+'-28',tab:'ctx',cat:'Inflación',k:'--neg',d:cap1(mesL(il[0])),t:`La inflación fue de ${nf(il[1],1)}% en ${MESL[+il[0].slice(5,7)-1]}`,x:`En los últimos 12 meses los precios subieron ${nf(il[2],1)}%. El Presupuesto espera cerrar 2026 en ${nf(D.presupuesto.ipc_dic['2026'],0)}%.`,s:'INDEC'});
     items.push({o:qEnd(lq)+'-28',tab:'ied',cat:'Inversión extranjera',k:'--c1',d:cap1(qLong(lq)),t:`Entraron USD ${nf(lf.tot)} millones de inversión extranjera`,x:`De ese total, USD ${nf(lf.apo)} millones fueron aportes nuevos de capital y USD ${nf(lf.ren+lf.div)} millones, ganancias que las empresas reinvirtieron en el país.`,s:'BCRA'});
     N.forEach(n=>items.push({o:n.fecha,tab:'rigi',cat:'RIGI',k:'--c2',d:fdate(n.fecha),t:n.titulo,x:n.detalle||'',s:n.fuente,u:n.url}));
     if(E.emae)items.push({o:E.emae.periodo+'-28',tab:'ctx',cat:'Actividad económica',k:'--c3',d:cap1(mesL(E.emae.periodo)),t:`La actividad ${up(E.emae.ia)} ${nf(Math.abs(E.emae.ia),1)}% frente a un año atrás`,x:`Es la comparación de ${MESL[+E.emae.periodo.slice(5,7)-1]} contra el mismo mes de ${+E.emae.periodo.slice(0,4)-1}. En lo que va del año, la economía ${up(E.emae.acum_ia)} ${nf(Math.abs(E.emae.acum_ia),1)}%.`,s:'INDEC'});
@@ -681,9 +679,9 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
 
 
   // ---------- hojas
-  const TABS=['portada','ied','ipc','rigi','ctx','notas'];
-  const RENDER={portada:drawPortada,ied:drawIED,ipc:drawIPC,rigi:drawRIGI,ctx:drawCtx,notas:()=>{}};
-  const USES_RANGE={ied:1,ipc:1,ctx:1};
+  const TABS=['portada','ctx','ied','rigi','notas'];
+  const RENDER={portada:drawPortada,ctx:drawCtx,ied:drawIED,rigi:drawRIGI,notas:()=>{}};
+  const USES_RANGE={ctx:1,ied:1};
   let cur='portada';
   function show(t,noScroll){if(!TABS.includes(t))t='portada';cur=t;
     TABS.forEach(x=>{document.getElementById('tab-'+x).hidden=x!==t;const b=document.getElementById('t-'+x);b.setAttribute('aria-selected',x===t);b.tabIndex=x===t?0:-1});
@@ -706,7 +704,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
   rigiSetup(); methods();
   let saved=null; try{saved=JSON.parse(localStorage.getItem('mia-range')||'null')}catch(e){}
   if(saved&&saved[0]&&saved[1]) setRange(saved[0],saved[1],saved[2],true); else setRange('2017-01',maxM,null,true);
-  let start=(location.hash||'').slice(1); if(start==='pbi')start='ctx'; if(!TABS.includes(start))start='portada';
+  let start=(location.hash||'').slice(1); if(start==='pbi'||start==='ipc')start='ctx'; if(!TABS.includes(start))start='portada';
   show(start,true);
   try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw)}catch(e){}
   new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
