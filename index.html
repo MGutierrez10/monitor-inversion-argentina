@@ -173,13 +173,16 @@ td.num{white-space:nowrap}
 .apitbl tbody tr{cursor:pointer}
 .apitbl tbody tr:hover td{background:color-mix(in srgb,var(--c1) 6%,var(--panel))}
 .apitbl .ps{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
-.wcard .ag{border-top:1px solid var(--line);padding:10px 0 4px}
-.wcard .ag h4{font:700 14px var(--f-head);margin:0 0 2px}
-.wcard .ag .nm{font-size:12.5px;color:var(--muted);margin-bottom:6px}
-.wcard .ag dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:0 0 8px;font-size:12.5px}
-.wcard .ag dt{color:var(--muted)} .wcard .ag dd{margin:0;text-align:right}
+.wag{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 16px 14px}
+.wag .sec2{font:600 11px/1.2 var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:10px 0 8px;border-bottom:1px solid var(--line)}
+.agrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0 28px}
+.wag .ag{padding:10px 0 4px}
+.wag .ag h4{font:700 14px var(--f-head);margin:0 0 2px}
+.wag .ag .nm{font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.wag .ag dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:0 0 8px;font-size:12.5px}
+.wag .ag dt{color:var(--muted)} .wag .ag dd{margin:0;text-align:right}
 .chips2{display:flex;flex-wrap:wrap;gap:5px}
-.chips2 span{font-size:11.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line2);color:var(--faint)}
+.chips2 span{font-size:12.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line2);color:var(--faint)}
 .chips2 span.y{background:color-mix(in srgb,var(--c1) 12%,var(--panel));border-color:color-mix(in srgb,var(--c1) 40%,var(--panel));color:var(--fg)}
 /* portada */
 .hero{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(125deg,#041d57 0%,#0a3585 48%,#0f4aa8 100%);color:#fff;border-radius:16px;padding:clamp(24px,4vw,40px);display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:end;box-shadow:0 10px 30px rgba(4,29,87,.18)}
@@ -415,16 +418,11 @@ td.num{white-space:nowrap}
         <div>
           <div class="wmap" id="wMap"><svg id="wSvg" role="img" aria-label="Mapa del mundo"></svg><div class="wtip" id="wTip" hidden></div></div>
           <div class="wleg" id="wLeg"></div>
+          <div class="wag" id="wAg"></div>
         </div>
         <div class="wcard" id="wCard" aria-live="polite"></div>
       </div>
       <p class="note" id="wNote"></p>
-    </div>
-    <div class="panel wide" id="apis">
-      <div class="ph"><div><h3>Agencias de promoción de inversiones por país</h3><p class="note" id="apiSub" style="margin:2px 0 0"></p></div>
-        <div class="row"><label class="note" for="aReg">Región</label><select id="aReg"></select><label class="note" for="aServ">Ofrece</label><select id="aServ"></select></div></div>
-      <div class="tbl apitbl"><table id="tApi"></table></div>
-      <p class="note">✓ = la agencia ofrece el servicio. Tocá una fila para ver la ficha del país en el mapa; el nombre de la agencia lleva a su sitio web.</p>
     </div>
   </section>
   </div>
@@ -847,7 +845,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
   function wRank(i,key){const arr=wAll(key).sort((a,b)=>b[1]-a[1]);const k=arr.findIndex(x=>x[0]===i);return k<0?null:[k+1,arr.length]}
   function wCardFor(i){
     const el=document.getElementById('wCard');
-    if(!i){el.innerHTML='<div class="wempty">Pasá el mouse o tocá un país del mapa para ver sus datos.</div>';return}
+    if(!i){el.innerHTML='<div class="wempty">Pasá el mouse o tocá un país del mapa para ver sus datos.</div>';wAgFor(null);return}
     const P=MW.paises[i]||{}, vd=WV.find(v=>v[0]===wv), r=wv==='api'?null:wRank(i,wv);
     const rk=r?`Puesto ${r[0]} de ${r[1]} en ${vd[1]} (de mayor a menor)`:'';
     const val=(v,d,k)=>`<td class="r num"${v<0?' style="color:var(--neg)"':''}>${v!=null?nf(v,k==='pbi_usd'&&v<10?1:d):'–'}</td>`;
@@ -856,7 +854,8 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
       (I?[['Stock al '+qL(wQ)+' (USD M)',I.stock,'ied'],['Flujo '+qL(wQ)+' (USD M)',I.fq]].map(([l,v,k])=>`<tr class="${k===wv?'on':''}"><td>${l}</td>${val(v,1)}</tr>`).join('')
          :`<tr><td colspan="2" class="note">Sin inversiones registradas por el BCRA con origen en este país.</td></tr>`);
     el.innerHTML=`<h3>${wName(i)}</h3>${rk?`<div class="rk">${rk}</div>`:''}<table><tbody><tr class="sec"><td colspan="2">Economía · ${MW.anio} (FMI)</td></tr>`+
-      WV.filter(v=>v[0]!=='ied'&&v[0]!=='api').map(([k,,,l,d])=>`<tr class="${k===wv?'on':''}"><td>${l}</td>${val(P[k],d,k)}</tr>`).join('')+ied+'</tbody></table>'+`<div class="sec2">Agencia de promoción de inversiones</div>`+apBlock(i);
+      WV.filter(v=>v[0]!=='ied'&&v[0]!=='api').map(([k,,,l,d])=>`<tr class="${k===wv?'on':''}"><td>${l}</td>${val(P[k],d,k)}</tr>`).join('')+ied+'</tbody></table>';
+    wAgFor(i);
   }
   function wSetup(){
     if(!MW||!MG){document.getElementById('tab-mundo').querySelector('.panel').innerHTML='<div class="empty">Datos del FMI no disponibles por el momento.</div>';return}
@@ -911,29 +910,9 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
   function apBlock(i){const L=APBY[i]; if(!L)return `<div class="ag"><span class="note">Sin agencia en el relevamiento.</span></div>`;
     return L.map(a=>`<div class="ag"><h4>${a.web?`<a href="${a.web}" target="_blank" rel="noopener">${a.sigla}</a>`:a.sigla}${a.subnacional?` <span class="note">· ${a.subnacional}</span>`:''}</h4>${a.nombre&&a.nombre!==a.sigla?`<div class="nm">${a.nombre}</div>`:''}
       <dl>${a.depende?`<dt>Depende de</dt><dd>${a.depende}</dd>`:''}${a.org?`<dt>Tipo</dt><dd>${a.org}</dd>`:''}<dt>Oficinas</dt><dd>${a.of_pais??'–'} en el país · ${a.of_ext??'–'} afuera</dd><dt>Miembro de WAIPA</dt><dd>${a.waipa==null?'–':a.waipa?'Sí':'No'}</dd></dl>
-      <div class="chips2">${SV.map(([k,l])=>`<span class="${a.s[k]?'y':''}">${a.s[k]?'✓ ':''}${l}</span>`).join('')}</div></div>`).join('');}
-  let apReg='', apServ='';
-  function apisSetup(){
-    if(!AP.length){document.getElementById('apis').hidden=true;return}
-    const R=[...new Set(AP.map(a=>a.region).filter(Boolean))].sort();
-    document.getElementById('aReg').innerHTML='<option value="">Todas</option>'+R.map(r=>`<option>${r}</option>`).join('');
-    document.getElementById('aServ').innerHTML='<option value="">Cualquier servicio</option>'+SV.map(([k,l])=>`<option value="${k}">${l}</option>`).join('');
-    document.getElementById('aReg').onchange=e=>{apReg=e.target.value;apTable()};
-    document.getElementById('aServ').onchange=e=>{apServ=e.target.value;apTable()};
-    document.getElementById('apiSub').textContent=`${AP.length} agencias de ${new Set(AP.map(a=>a.iso)).size} países y regiones · relevamiento de PromArgentina${D.apis.fecha?` al ${D.apis.fecha.split('-').reverse().join('/')}`:''}`;
-    apTable();
-  }
-  function apTable(){
-    const pn=a=>a.iso?wName(a.iso):a.pais;
-    const L=AP.filter(a=>(!apReg||a.region===apReg)&&(!apServ||a.s[apServ])).sort((a,b)=>(a.region||'~').localeCompare(b.region||'~','es')||pn(a).localeCompare(pn(b),'es')||a.sigla.localeCompare(b.sigla));
-    let prev=null;
-    document.getElementById('tApi').innerHTML=`<thead><tr><th>Región</th><th class="stick">País</th><th>Agencia</th>${SV.map(([k,l])=>`<th class="v">${l}</th>`).join('')}</tr></thead><tbody>`+
-      (L.length?L.map(a=>{const rg=a.region!==prev?a.region||'–':'';prev=a.region;
-        return `<tr class="${a.promarg?'pa':''}${rg?' rg':''}" data-iso="${a.iso||''}" tabindex="0"><td class="rgn">${rg}</td><td class="stick">${pn(a)}${a.subnacional?`<span class="ps">${a.subnacional}</span>`:''}</td><td class="ag">${a.web?`<a href="${a.web}" target="_blank" rel="noopener">${a.sigla}</a>`:a.sigla}</td>${SV.map(([k])=>`<td class="c${a.s[k]?'':' no'}">${a.s[k]?'✓':''}</td>`).join('')}</tr>`}).join(''):`<tr><td colspan="${SV.length+3}" class="note">Ninguna agencia cumple el filtro.</td></tr>`)+'</tbody>';
-    document.querySelectorAll('#tApi tbody tr[data-iso]').forEach(tr=>{const go=e=>{if(e&&e.target.closest('a'))return;const i=tr.dataset.iso;if(!i)return;wPick(i);document.getElementById('wMap').scrollIntoView({behavior:'smooth',block:'center'})};tr.onclick=go;tr.onkeydown=e=>{if(e.key==='Enter')go()}});
-  }
-
-
+      <div class="chips2">${SV.filter(([k])=>a.s[k]).map(([k,l])=>`<span class="y">✓ ${l}</span>`).join('')||'<span class="note">Sin servicios informados.</span>'}</div></div>`).join('');}
+  function wAgFor(i){const el=document.getElementById('wAg');if(!el)return;if(!i){el.innerHTML='';el.hidden=true;return}el.hidden=false;
+    el.innerHTML=`<div class="sec2">Agencia de promoción de inversiones · ${wName(i)}</div><div class="agrid">${APBY[i]?apBlock(i):'<div class="ag"><span class="note">Este país no está en el relevamiento de agencias.</span></div>'}</div>`;}
 
   // ---------- hojas
   const TABS=['portada','ctx','ied','rigi','mundo','notas'];
@@ -958,7 +937,7 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
   group('data-fila',m=>{fila=m;drawIED()});
 
   function draw(){if(!window.Chart)return;RENDER[cur]();}
-  rigiSetup(); methods(); apisSetup();
+  rigiSetup(); methods();
   let saved=null; try{saved=JSON.parse(localStorage.getItem('mia-range')||'null')}catch(e){}
   if(saved&&saved[0]&&saved[1]) setRange(saved[0],saved[1],saved[2],true); else setRange('2017-01',maxM,null,true);
   let start=(location.hash||'').slice(1); if(start==='pbi'||start==='ipc')start='ctx'; if(!TABS.includes(start))start='portada';
