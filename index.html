@@ -217,6 +217,9 @@ td.num{white-space:nowrap}
 body.has-full{overflow:hidden}
 @media (max-width:860px){.panel.full .wgrid{grid-template-columns:1fr}}
 /* portada */
+.hero .qa h3{font:700 13px/1.2 var(--f-head);text-transform:uppercase;letter-spacing:.08em;color:#9fd0ff;margin:16px 0 4px}
+.hero .qa h3:first-child{margin-top:14px}
+.hero .qa p{margin:0}
 .hero{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(125deg,#041d57 0%,#0a3585 48%,#0f4aa8 100%);color:#fff;border-radius:16px;padding:clamp(24px,4vw,40px);display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:end;box-shadow:0 10px 30px rgba(4,29,87,.18)}
 .hero::before,.hero::after{content:"";position:absolute;z-index:-1;pointer-events:none}
 .hero::before{inset:0;background:
@@ -308,7 +311,12 @@ body.has-full{overflow:hidden}
       <div class="hero">
         <div>
           <h2>Una foto clara y actualizada de la economía argentina y de la inversión que llega al país.</h2>
-          <p>El monitor reúne en un solo lugar el tamaño de la economía argentina, la inflación y el contexto macroeconómico, la inversión extranjera directa por país de origen y sector, los grandes proyectos del RIGI y una mirada al mundo con los datos de cada país y su agencia de promoción de inversiones. Se actualiza en forma automática cada día hábil con datos oficiales del INDEC, el BCRA, el Ministerio de Economía y el FMI.</p>
+          <div class="qa">
+            <h3>¿Qué es?</h3>
+            <p>Un tablero público que reúne en un solo lugar los principales datos de la economía argentina y de la inversión que llega al país: PBI, inflación, contexto macroeconómico, inversión extranjera directa por país de origen y sector, proyectos del RIGI y datos de otros países y sus agencias de promoción de inversiones. Se actualiza solo cada día hábil con fuentes oficiales (INDEC, BCRA, Ministerio de Economía y FMI).</p>
+            <h3>¿Para qué sirve?</h3>
+            <p>Para tener a mano, en pocos clics, los números que se usan al presentar a Argentina como destino de inversión: cómo evoluciona la economía, de dónde viene la inversión extranjera y hacia qué sectores, qué grandes proyectos avanzan y cómo se compara el país con el resto del mundo.</p>
+          </div>
         </div>
         <figure class="map" aria-label="Mapa de Argentina">
           <svg id="mapSvg" viewBox="0 0 300 520" role="img"></svg>
