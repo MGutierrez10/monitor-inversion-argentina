@@ -115,15 +115,13 @@ td.num{white-space:nowrap}
 .pivot td,.pivot th{white-space:nowrap}
 .pivot .stick{position:sticky;left:0;background:var(--panel);z-index:1;max-width:280px;overflow:hidden;text-overflow:ellipsis}
 .pivot th.stick{background:var(--sunk);z-index:2}
-.pivot tr.grp td{font-weight:700;border-top:1px solid var(--line)}
+.pivot tr.grp td,.pivot tbody tr.grp:nth-child(n) td.stick{font-weight:700;background:var(--sunk)}
 .pivot.grpd .stick{width:360px;min-width:360px;max-width:360px;white-space:normal}
-.pivot .tg{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-right:8px;border:1px solid var(--muted);border-radius:2px;font:600 11px/1 var(--f-body);color:var(--muted);vertical-align:-2px}
-.pivot tr.sub td.stick{padding-left:36px;font-weight:400}
-.pivot tr.sub[hidden]{display:none}
+.pivot tr.sub td.stick{padding-left:28px}
 .pivot tbody tr:nth-child(even) td.stick{background:var(--panel)}
 .pivot tr.tot td{background:color-mix(in srgb,var(--c1) 8%,var(--panel));font-weight:600}
-.pivot tr.clk,.pivot tr.grp{cursor:pointer}
-.pivot tr.clk:hover td,.pivot tr.clk:focus td,.pivot tr.grp:hover td,.pivot tr.grp:focus td{background:color-mix(in srgb,var(--c1) 6%,var(--panel))}
+.pivot tr.clk{cursor:pointer}
+.pivot tr.clk:hover td,.pivot tr.clk:focus td{background:color-mix(in srgb,var(--c1) 6%,var(--panel))}
 /* portada */
 .hero{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(125deg,#041d57 0%,#0a3585 48%,#0f4aa8 100%);color:#fff;border-radius:16px;padding:clamp(24px,4vw,40px);display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:end;box-shadow:0 10px 30px rgba(4,29,87,.18)}
 .hero::before,.hero::after{content:"";position:absolute;z-index:-1;pointer-events:none}
@@ -458,7 +456,6 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
   document.getElementById('iClear').onclick=()=>{fP=fS=fU='';fillSel();drawIED()};
   const keyOf=(q)=>colF==='q'?q:q.slice(0,4);
   const labOf=(k)=>colF==='q'?qL(k):k;
-  const OPEN=new Set();
   function drawIED(){
     const Qin=CU.trimestres.map((q,i)=>[q,i]).filter(([q])=>inQ(q));
     const qset=new Set(Qin.map(x=>x[1]));
@@ -523,19 +520,13 @@ const DATA = {"actualizado":"2026-09-30","ipc":[["2017-01",1.59,null],["2017-02"
     if(two){
       const G={}; R.forEach(x=>{const g=SUB2SEC[x[0]];(G[g]=G[g]||{o:{},e:0,rows:[]}).rows.push(x);pk.forEach(p=>G[g].o[p]=(G[g].o[p]||0)+(x[1][p]||0));G[g].e+=x[2]});
       const gs=Object.entries(G).sort((a,b)=>b[1].e-a[1].e);
-      if(gs.length===1)OPEN.add(+gs[0][0]);
-      body=gs.map(([g,v])=>{const op=OPEN.has(+g);
-        return line('grp',`data-g="${g}" tabindex="0" aria-expanded="${op}"`,`<span class="tg">${op?'−':'+'}</span>${CU.sectores[+g]}`,v.o,v.e)+
-          v.rows.map(([k,o,e])=>line('clk sub',`data-k="${k}" data-pg="${g}" tabindex="0"${op?'':' hidden'}`,nameOf(k),o,e)).join('')}).join('');
+      body=gs.map(([g,v])=>line('grp','',CU.sectores[+g],v.o,v.e)+
+          v.rows.map(([k,o,e])=>line('clk sub',`data-k="${k}" tabindex="0"`,nameOf(k),o,e)).join('')).join('');
     }else body=R.map(([k,o,e])=>line('clk',`data-k="${k}" tabindex="0"`,nameOf(k),o,e)).join('');
     document.querySelector('.tbl.pivot').classList.toggle('grpd',two);
     document.getElementById('tPivot').innerHTML=head+`<tr class="tot"><td class="stick"><b>Total selección</b></td>${pk.map(p=>cell(totRow[p])).join('')}${cell(totE)}<td class="r num">100</td></tr>`+body+'</tbody>';
-    document.querySelectorAll('#tPivot tr.grp').forEach(tr=>{const t=()=>{const g=+tr.dataset.g, op=!OPEN.has(g);
-      op?OPEN.add(g):OPEN.delete(g); tr.setAttribute('aria-expanded',op); tr.querySelector('.tg').textContent=op?'−':'+';
-      document.querySelectorAll(`#tPivot tr.sub[data-pg="${g}"]`).forEach(r=>r.hidden=!op)};
-      tr.onclick=t; tr.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t()}}});
     document.querySelectorAll('#tPivot tr.clk').forEach(tr=>{const go=()=>{const k=tr.dataset.k;
-      if(fila==='pais'){fP=k;fila='sec'}else if(fila==='sec'){fS=k;fU='';fila='sub';OPEN.add(+k)}else{fU=k;fS=String(SUB2SEC[+k])}
+      if(fila==='pais'){fP=k;fila='sec'}else if(fila==='sec'){fS=k;fU='';fila='sub'}else{fU=k;fS=String(SUB2SEC[+k])}
       document.querySelectorAll('[data-fila]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.fila===fila));fillSel();drawIED()};
       tr.onclick=go; tr.onkeydown=e=>{if(e.key==='Enter')go()}});
     const sc=document.querySelector('.tbl.pivot'); sc.scrollLeft=sc.scrollWidth;
