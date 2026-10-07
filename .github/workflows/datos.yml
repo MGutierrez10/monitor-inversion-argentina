@@ -2,7 +2,8 @@ name: Datos oficiales
 
 on:
   schedule:
-    - cron: '17 10 * * *'   # todos los días 07:17 (Buenos Aires), antes de la actualización del monitor
+    # cuatro veces por día (hora de Buenos Aires: 06:20, 10:20, 14:20 y 18:20), media hora antes de cada actualización del monitor
+    - cron: '20 9,13,17,21 * * *'
   workflow_dispatch: {}
   push:
     branches: [main]

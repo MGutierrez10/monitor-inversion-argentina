@@ -146,7 +146,9 @@ def _rp():
     j = json.loads(get('https://api.argentinadatos.com/v1/finanzas/indices/riesgo-pais'))
     pts = sorted((r['fecha'][:10], float(r['valor'])) for r in j if r.get('valor') is not None)
     series['riesgo_pais'] = {'fuente': 'J.P. Morgan EMBI vía ArgentinaDatos', 'ultimo': pts[-1],
-                             'fin_mes': {m: v for m, v in {d[:7]: val for d, val in pts}.items()}}
+                             'fin_mes': {m: v for m, v in {d[:7]: val for d, val in pts}.items()},
+                             # serie diaria desde 2010: el monitor la usa para completar días que le falten
+                             'diario': [[d, int(round(val))] for d, val in pts if d >= '2010-01-01']}
     return {'ultimo': pts[-1]}
 
 
