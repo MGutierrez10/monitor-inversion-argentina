@@ -213,8 +213,18 @@ def _tcr():
         out['itcrm'], out['itcr_usa'] = av(best[0]), av(best[1])
         info['itcrm_hoja'], info['itcrm_ultimo'] = best[2], max(out['itcrm'])
     except Exception as e: errs.append(f'itcrm: {type(e).__name__}: {e}')
+    # dólar blue (venta, promedio mensual) desde ArgentinaDatos
+    try:
+        j = json.loads(get('https://api.argentinadatos.com/v1/cotizaciones/dolares/blue', timeout=120))
+        m = {}
+        for r in j:
+            if r.get('venta') and str(r.get('fecha', '')) >= '2015-12': m.setdefault(r['fecha'][:7], []).append(float(r['venta']))
+        if len(m) < 100: raise RuntimeError(f'pocos meses: {len(m)}')
+        out['blue'] = {k: round(sum(v) / len(v), 2) for k, v in sorted(m.items())}
+        info['blue_ultimo'] = max(out['blue'])
+    except Exception as e: errs.append(f'blue: {type(e).__name__}: {e}')
     if not out: raise RuntimeError('; '.join(errs))
-    out['fuente'] = 'BCRA (TC mayorista A3500, inflación 2016 e ITCRM) y BLS (IPC de EE.UU.)'
+    out['fuente'] = 'BCRA (TC mayorista A3500, inflación 2016 e ITCRM), BLS (IPC de EE.UU.) y ArgentinaDatos (dólar blue)'
     series['tcr'] = out
     info['errores'] = errs
     return info
