@@ -150,17 +150,32 @@ def _tcr():
             with urllib.request.urlopen(req, timeout=90) as r: j = json.loads(r.read().decode())
             for x in j['Results']['series'][0]['data']:
                 if x['period'].startswith('M') and x['period'] != 'M13':
-                    cpi[f"{x['year']}-{x['period'][1:]}"] = float(x['value'])
+                    try: cpi[f"{x['year']}-{x['period'][1:]}"] = float(x['value'])
+                    except ValueError: pass  # mes sin publicar (p. ej. octubre de 2025, por el cierre del gobierno de EE.UU.)
         info['cpi_fuente'] = 'BLS'
     except Exception as e:
         errs.append(f'bls: {e}')
-    if len(cpi) < 100:
+    def huecos():
+        ks = sorted(cpi); out = []
+        if not ks: return ['todo']
+        y, m = int(ks[0][:4]), int(ks[0][5:])
+        while f'{y}-{m:02d}' < ks[-1]:
+            if f'{y}-{m:02d}' not in cpi: out.append(f'{y}-{m:02d}')
+            y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+        return out
+    if len(cpi) < 100 or huecos():
         try:
             for line in get('https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCNS').splitlines()[1:]:
                 d, v = line.split(',')
-                if d >= '2015-12' and v not in ('.', ''): cpi[d[:7]] = float(v)
-            info['cpi_fuente'] = 'FRED'
+                if d >= '2015-12' and v not in ('.', '') and d[:7] not in cpi: cpi[d[:7]] = float(v)
+            info['cpi_fuente'] = info.get('cpi_fuente', '') + '+FRED'
         except Exception as e: errs.append(f'fred: {e}')
+    # meses que EE.UU. no publicó: promedio geométrico de los meses vecinos (queda anotado)
+    hu = [h for h in huecos() if h != 'todo']
+    for h in hu:
+        ks = sorted(cpi); a = max(k for k in ks if k < h); b = min(k for k in ks if k > h)
+        cpi[h] = round((cpi[a] * cpi[b]) ** 0.5, 3)
+    if hu: info['cpi_interpolados'] = hu; out['cpi_usa_interpolados'] = hu
     if cpi: out['cpi_usa'] = dict(sorted(cpi.items())); info['cpi_ultimo'] = max(cpi)
     # ITCRM y bilateral con EE.UU. (BCRA, diario, base 17-12-15=100) -> promedio mensual
     try:
