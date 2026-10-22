@@ -115,6 +115,96 @@ def _bcra():
     return {'ultimos': out}
 
 
+# ---------- Tipo de cambio real y paridad (base enero 2016)
+# Insumos: TC mayorista e inflación mensual de 2016 (BCRA API; el resto ya está en series.json),
+# IPC de EE.UU. (BLS, CPI-U sin desestacionalizar; FRED como alternativa) e ITCRM del BCRA (Excel diario).
+ITCRM_URLS = ['https://www.bcra.gob.ar/Pdfs/PublicacionesEstadisticas/ITCRMSerie.xlsx',
+              'https://www.bcra.gob.ar/archivos/Pdfs/PublicacionesEstadisticas/ITCRMSerie.xlsx']
+
+@fuente('tcr')
+def _tcr():
+    import io, datetime as dt
+    out, info, errs = {}, {}, []
+    def bcra(v, d0, d1):
+        u = f'https://api.bcra.gob.ar/estadisticas/v4.0/monetarias/{v}?desde={d0}&hasta={d1}&limit=3000'
+        try: j = json.loads(get(u))
+        except Exception: j = json.loads(get(u, insecure=True))
+        res = j.get('results') or j.get('resultados') or []
+        if isinstance(res, list) and res and 'detalle' in res[0]: res = res[0]['detalle']
+        return sorted((r['fecha'][:10], float(r['valor'])) for r in res)
+    try:
+        m = {}
+        for d, v in bcra(5, '2015-12-01', '2016-12-31'): m.setdefault(d[:7], []).append(v)
+        out['tc_2016'] = {k: round(sum(v) / len(v), 4) for k, v in sorted(m.items())}
+        out['ipc_mm_2016'] = {d[:7]: v for d, v in bcra(27, '2015-12-01', '2016-12-31')}
+        info['bcra_2016'] = len(out['tc_2016'])
+    except Exception as e: errs.append(f'bcra 2016: {e}')
+    # IPC de EE.UU. (CPI-U, todos los ítems, sin desestacionalizar)
+    cpi = {}
+    try:
+        y1 = datetime.date.today().year
+        for a, b in ((2015, 2024), (2025, y1)):
+            body = json.dumps({'seriesid': ['CUUR0000SA0'], 'startyear': str(a), 'endyear': str(b)}).encode()
+            req = urllib.request.Request('https://api.bls.gov/publicAPI/v1/timeseries/data/', data=body,
+                                         headers={**UA, 'Content-Type': 'application/json'})
+            with urllib.request.urlopen(req, timeout=90) as r: j = json.loads(r.read().decode())
+            for x in j['Results']['series'][0]['data']:
+                if x['period'].startswith('M') and x['period'] != 'M13':
+                    cpi[f"{x['year']}-{x['period'][1:]}"] = float(x['value'])
+        info['cpi_fuente'] = 'BLS'
+    except Exception as e:
+        errs.append(f'bls: {e}')
+    if len(cpi) < 100:
+        try:
+            for line in get('https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCNS').splitlines()[1:]:
+                d, v = line.split(',')
+                if d >= '2015-12' and v not in ('.', ''): cpi[d[:7]] = float(v)
+            info['cpi_fuente'] = 'FRED'
+        except Exception as e: errs.append(f'fred: {e}')
+    if cpi: out['cpi_usa'] = dict(sorted(cpi.items())); info['cpi_ultimo'] = max(cpi)
+    # ITCRM y bilateral con EE.UU. (BCRA, diario, base 17-12-15=100) -> promedio mensual
+    try:
+        import openpyxl
+        b = None
+        for u in ITCRM_URLS:
+            for insecure in (False, True):
+                try: b = get(u, binary=True, timeout=180, insecure=insecure); break
+                except Exception as e: last = e
+            if b: break
+        if not b: raise last
+        wb = openpyxl.load_workbook(io.BytesIO(b), read_only=True, data_only=True)
+        info['itcrm_hojas'] = wb.sheetnames
+        best = None
+        for ws in wb.worksheets:
+            rows = list(ws.iter_rows(values_only=True))
+            for i, r in enumerate(rows[:40]):
+                t = [str(c or '').strip().lower() for c in r]
+                ci = next((k for k, c in enumerate(t) if 'itcrm' in c or 'multilateral' in c), None)
+                cu = next((k for k, c in enumerate(t) if 'estados unidos' in c), None)
+                if ci is None or cu is None: continue
+                mm, mu = {}, {}
+                for r2 in rows[i + 1:]:
+                    f = r2[0]
+                    if isinstance(f, (dt.datetime, dt.date)): k = f.strftime('%Y-%m')
+                    else:
+                        try: k = dt.datetime.strptime(str(f).strip()[:10], '%d/%m/%Y').strftime('%Y-%m')
+                        except Exception: continue
+                    try: mm.setdefault(k, []).append(float(r2[ci])); mu.setdefault(k, []).append(float(r2[cu]))
+                    except Exception: pass
+                if len(mm) > 100 and (best is None or len(mm) > len(best[0])): best = (mm, mu, ws.title, r[ci], r[cu])
+                break
+        if not best: raise RuntimeError('no se encontró la tabla del ITCRM')
+        av = lambda d: {k: round(sum(v) / len(v), 4) for k, v in sorted(d.items()) if k >= '2015-12' and v}
+        out['itcrm'], out['itcr_usa'] = av(best[0]), av(best[1])
+        info['itcrm_hoja'], info['itcrm_ultimo'] = best[2], max(out['itcrm'])
+    except Exception as e: errs.append(f'itcrm: {type(e).__name__}: {e}')
+    if not out: raise RuntimeError('; '.join(errs))
+    out['fuente'] = 'BCRA (TC mayorista A3500, inflación 2016 e ITCRM) y BLS (IPC de EE.UU.)'
+    series['tcr'] = out
+    info['errores'] = errs
+    return info
+
+
 # ---------- datos.gob.ar (IPC INDEC)
 SERIES_API = 'https://apis.datos.gob.ar/series/api/series/'
 
