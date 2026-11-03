@@ -1,5 +1,5 @@
 {
- "consulta": "2026-11-03T11:23Z",
+ "consulta": "2026-11-03T17:48Z",
  "servicios": {
   "ipi_manufacturero": {
    "descripcion": "Índice de producción industrial manufacturero (IPI manufacturero), nivel general y aperturas por actividad económica, base 2004=100. Incluye las series original, desestacionalizada y tendencia-ciclo, expresadas como números índice y variaciones porcentuales.\n \nEste endpoint contiene información desd",
@@ -71,6 +71,25 @@
     "fecha"
    ]
   },
+  "ipc_nacional": {
+   "descripcion": "Índice de precios al consumidor (IPC) de la República Argentina, con aperturas por región, división, grupo, clase y subclase, desde diciembre de 2016.\nPara más información, se puede consultar la metodología INDEC N° 32, Índice de precios al consumidor (IPC). Base diciembre 2016=100, a través del sig",
+   "columnas": [
+    "clasificador",
+    "nivel",
+    "codigo",
+    "descripcion",
+    "periodo",
+    "anio",
+    "mes",
+    "indicador",
+    "tipo_de_indicador",
+    "tipo_de_indicador_descripcion",
+    "region",
+    "unidad_de_medida",
+    "valor",
+    "observaciones"
+   ]
+  },
   "valorizacion_canastas_cba_cbt": {
    "descripcion": "Valorización mensual de la canasta básica alimentaria (CBA) y de la canasta básica total (CBT) desde abril de 2016. Gran Buenos Aires.\nPara más información, se puede consultar la metodología INDEC N° 22, La medición de la pobreza y la indigencia en la Argentina, a través del siguiente enlace: https:",
    "columnas": [
@@ -90,8 +109,8 @@
     "observaciones"
    ]
   },
-  "ipc_nacional": {
-   "descripcion": "Índice de precios al consumidor (IPC) de la República Argentina, con aperturas por región, división, grupo, clase y subclase, desde diciembre de 2016.\nPara más información, se puede consultar la metodología INDEC N° 32, Índice de precios al consumidor (IPC). Base diciembre 2016=100, a través del sig",
+  "indice_salarios": {
+   "descripcion": "El índice de salarios estima la evolución de los salarios pagados en la economía aislando el indicador de variaciones relacionadas con conceptos tales como la cantidad de horas trabajadas, descuentos por ausentismo, premios por productividad y todo otro concepto asociado al desempeño o a las caracte",
    "columnas": [
     "clasificador",
     "nivel",
@@ -101,6 +120,25 @@
     "anio",
     "mes",
     "indicador",
+    "tipo_de_indicador",
+    "tipo_de_indicador_descripcion",
+    "unidad_de_medida",
+    "valor",
+    "observaciones"
+   ]
+  },
+  "icc_precios_construccion": {
+   "descripcion": "Índice del costo de la construcción (ICC) en el Gran Buenos Aires, base 1993. \nEste endpoint contiene información desde noviembre de 2015.\nPara más información, se puede consultar la metodología INDEC N°  9, Índice del Costo de la Construcción en el Gran Buenos Aires, base 1993, a través del siguien",
+   "columnas": [
+    "indicador",
+    "codigo_apertura",
+    "codigo_CPC_1",
+    "clasificador",
+    "nivel",
+    "descripcion",
+    "periodo",
+    "anio",
+    "mes",
     "tipo_de_indicador",
     "tipo_de_indicador_descripcion",
     "region",
@@ -142,44 +180,6 @@
     "clasificador",
     "nivel",
     "codigo_apertura",
-    "descripcion",
-    "periodo",
-    "anio",
-    "mes",
-    "tipo_de_indicador",
-    "tipo_de_indicador_descripcion",
-    "region",
-    "unidad_de_medida",
-    "valor",
-    "observaciones"
-   ]
-  },
-  "indice_salarios": {
-   "descripcion": "El índice de salarios estima la evolución de los salarios pagados en la economía aislando el indicador de variaciones relacionadas con conceptos tales como la cantidad de horas trabajadas, descuentos por ausentismo, premios por productividad y todo otro concepto asociado al desempeño o a las caracte",
-   "columnas": [
-    "clasificador",
-    "nivel",
-    "codigo",
-    "descripcion",
-    "periodo",
-    "anio",
-    "mes",
-    "indicador",
-    "tipo_de_indicador",
-    "tipo_de_indicador_descripcion",
-    "unidad_de_medida",
-    "valor",
-    "observaciones"
-   ]
-  },
-  "icc_precios_construccion": {
-   "descripcion": "Índice del costo de la construcción (ICC) en el Gran Buenos Aires, base 1993. \nEste endpoint contiene información desde noviembre de 2015.\nPara más información, se puede consultar la metodología INDEC N°  9, Índice del Costo de la Construcción en el Gran Buenos Aires, base 1993, a través del siguien",
-   "columnas": [
-    "indicador",
-    "codigo_apertura",
-    "codigo_CPC_1",
-    "clasificador",
-    "nivel",
     "descripcion",
     "periodo",
     "anio",
