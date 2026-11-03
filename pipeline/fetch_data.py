@@ -7,6 +7,7 @@ Salidas:
   data/series.json     series mensuales: IPC, tipo de cambio, reservas, inflación BCRA, riesgo país
   data/busqueda.json   candidatos de datos.gob.ar para EMAE y comercio exterior (para revisar IDs)
   data/estado.json     resultado de cada fuente (ok / error) y fecha de corrida
+  data/indec/          API del INDEC (beta): catálogo de servicios, muestras y series (requiere el secreto INDEC_API_TOKEN)
 """
 import json, os, sys, hashlib, subprocess, datetime, urllib.request, urllib.parse, ssl, traceback
 
@@ -294,6 +295,53 @@ def _fmi():
     save('fmi_mundo.json', {'anio': int(FMI_ANIO), 'fuente': 'FMI, World Economic Outlook (DataMapper)', 'descargado': estado['corrida'],
                             'indicadores': FMI_IND, 'nombres_en': nombres, 'paises': paises})
     return {'paises': len(paises), 'arg': paises.get('ARG')}
+
+
+# ---------- API del INDEC (beta, https://api.indec.gob.ar). Necesita el secreto INDEC_API_TOKEN.
+# El token solo se usa en el encabezado de la consulta: nunca se imprime ni se guarda.
+INDEC_BASE = 'https://api.indec.gob.ar/v1/'
+
+def indec_get(path, params=None, timeout=90):
+    tok = os.environ.get('INDEC_API_TOKEN', '').strip()
+    if not tok:
+        raise RuntimeError('Falta el secreto INDEC_API_TOKEN')
+    url = INDEC_BASE + path + ('?' + '&'.join(params) if params else '')
+    req = urllib.request.Request(url, headers={**UA, 'Authorization': 'Bearer ' + tok, 'Accept': 'application/json'})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read().decode('utf-8', 'replace'))
+    except urllib.error.HTTPError as e:  # sin encabezados en el mensaje
+        raise RuntimeError(f'{path}: HTTP {e.code}') from None
+
+INDEC_DIR = os.path.join(DATA, 'indec')
+
+@fuente('indec_api')
+def _indec():
+    if not os.environ.get('INDEC_API_TOKEN', '').strip():
+        return {'omitido': 'sin token'}
+    os.makedirs(INDEC_DIR, exist_ok=True)
+    cat = indec_get('')
+    servicios = {}
+    if isinstance(cat, dict) and isinstance(cat.get('paths'), dict):  # descripción OpenAPI (PostgREST)
+        defs = cat.get('definitions') or (cat.get('components') or {}).get('schemas') or {}
+        for path in cat['paths']:
+            n = path.strip('/')
+            if not n or n.startswith('rpc/'):
+                continue
+            d = defs.get(n) or {}
+            servicios[n] = {'descripcion': (d.get('description') or '')[:300], 'columnas': list((d.get('properties') or {}).keys())}
+    json.dump({'consulta': estado['corrida'], 'servicios': servicios, 'crudo': None if servicios else str(cat)[:4000]},
+              open(os.path.join(INDEC_DIR, 'catalogo.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    # muestra chica de cada servicio para ver columnas y valores
+    muestras, errores = {}, {}
+    for n in servicios:
+        try:
+            muestras[n] = indec_get(n, ['limit=15'])
+        except Exception as e:
+            errores[n] = str(e)[:200]
+    json.dump({'consulta': estado['corrida'], 'muestras': muestras, 'errores': errores},
+              open(os.path.join(INDEC_DIR, 'muestras.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    return {'servicios': len(servicios), 'errores': len(errores)}
 
 
 save('series.json', series)
