@@ -315,6 +315,90 @@ def indec_get(path, params=None, timeout=90):
 
 INDEC_DIR = os.path.join(DATA, 'indec')
 
+def indec_all(path, order, filtros=(), select=None, page=1000, maxpag=400):
+    """Descarga paginada (PostgREST) con reintentos ante 429/5xx."""
+    import time
+    filas = []
+    for i in range(maxpag):
+        ps = [f'order={order}', f'limit={page}', f'offset={i * page}', *filtros] + ([f'select={select}'] if select else [])
+        for intento in range(5):
+            try:
+                pag = indec_get(path, ps, timeout=120); break
+            except RuntimeError as e:
+                if any(f'HTTP {c}' in str(e) for c in (429, 500, 502, 503, 504)) and intento < 4:
+                    time.sleep(5 * (intento + 1)); continue
+                raise
+        filas += pag
+        if len(pag) < page:
+            return filas
+    raise RuntimeError(f'{path}: demasiadas páginas')
+
+def _ym(per):
+    per = str(per)
+    return per[:4] + '-' + per[4:6]
+
+def _indec_ipc():
+    rows = indec_all('ipc_nacional', 'periodo.asc,region.asc,clasificador.asc,codigo.asc,tipo_de_indicador.asc',
+                     ['anio=gte.2016', 'tipo_de_indicador=in.(v_m,v_ia,v_acum)', 'nivel=not.in.(Grupo,Clase,Subclase,Bienes,Servicios)'],
+                     'periodo,region,nivel,codigo,descripcion,tipo_de_indicador,valor')
+    combos = sorted({(r.get('region'), r.get('nivel'), r.get('codigo')) for r in rows if not str(r.get('codigo') or '').isdigit()})
+    gen = [r for r in rows if 'nac' in str(r.get('region', '')).lower() and 'general' in (str(r.get('nivel', '')) + ' ' + str(r.get('descripcion', ''))).lower()]
+    by = {}
+    for r in gen:
+        if r.get('valor') is None: continue
+        by.setdefault(_ym(r['periodo']), {})[r['tipo_de_indicador']] = r['valor']
+    serie = [[m, v.get('v_m'), v.get('v_ia'), v.get('v_acum')] for m, v in sorted(by.items())]
+    if not serie:
+        raise RuntimeError(f'sin nivel general nacional; combinaciones: {combos[:20]}')
+    return {'columnas': ['mes', 'v_m', 'v_ia', 'v_acum'], 'serie': serie, 'ultimo': serie[-1][0]}
+
+def _indec_emae():
+    rows = indec_all('estimador-mensual-de-actividad-economica-nivel-general', 'periodo.asc,tipo_de_indicador_descripcion.asc',
+                     ['anio=gte.2015'], 'periodo,tipo_de_indicador_descripcion,valor')
+    K = {'Índice serie original': 'ind', 'Var % interanual serie original': 'ia', 'Índice serie desestacionalizada': 'ind_d',
+         'Var % mensual serie desestacionalizada': 'mm_d', 'Índice serie tendencia-ciclo': 'ind_t', 'Var % mensual serie tendencia-ciclo': 'mm_t'}
+    by = {}
+    for r in rows:
+        k = K.get(r.get('tipo_de_indicador_descripcion'))
+        if k and r.get('valor') is not None:
+            by.setdefault(_ym(r['periodo']), {})[k] = round(r['valor'], 4)
+    serie = [[m, v.get('ia'), v.get('mm_d'), v.get('ind'), v.get('ind_d')] for m, v in sorted(by.items())]
+    tipos = sorted({r.get('tipo_de_indicador_descripcion') for r in rows})
+    return {'columnas': ['mes', 'ia', 'mm_desest', 'indice', 'indice_desest'], 'serie': serie, 'ultimo': serie[-1][0], 'tipos': tipos}
+
+def _indec_pobreza():
+    rows = indec_all('pobreza_eph', 'periodo.asc,area_geografica_nom.asc', [])
+    serie = []
+    for r in rows:
+        if str(r.get('area_geografica_nom')) != 'T_31_A': continue
+        per = str(r['periodo'])  # '20252S'
+        serie.append([per[:4] + 'S' + per[4], r.get('tasa_pobreza_personas'), r.get('tasa_indigencia_personas'),
+                      r.get('tasa_pobreza_hogares'), r.get('tasa_indigencia_hogares')])
+    serie.sort()
+    return {'columnas': ['periodo', 'pobreza_personas', 'indigencia_personas', 'pobreza_hogares', 'indigencia_hogares'], 'serie': serie, 'ultimo': serie[-1][0]}
+
+def _indec_comercio():
+    desde = str(datetime.date.today().year - 2)
+    ex = indec_all('comercio_exterior_exportacion_bienes', 'Periodo.asc,rubro_cod.asc,subrubro_cod.asc,pais_cod.asc',
+                   [f'Anio=gte.{desde}'], 'Periodo,pais_cod,valor_FOB')
+    im = indec_all('comercio_exterior_importacion_bienes', 'Periodo.asc,uso_economico_cod.asc,gce_cod.asc,pais_cod.asc',
+                   [f'Anio=gte.{desde}'], 'Periodo,pais_cod,valor_CIF')
+    mes, pais = {}, {}
+    for r in ex:
+        m = _ym(r['Periodo']); v = r.get('valor_FOB') or 0
+        mes.setdefault(m, [0, 0])[0] += v
+        pais.setdefault(m[:4], {}).setdefault(r.get('pais_cod'), [0, 0])[0] += v
+    for r in im:
+        m = _ym(r['Periodo']); v = r.get('valor_CIF') or 0
+        mes.setdefault(m, [0, 0])[1] += v
+        pais.setdefault(m[:4], {}).setdefault(r.get('pais_cod'), [0, 0])[1] += v
+    M = lambda x: round(x / 1e6, 1)
+    serie = [[m, M(a), M(b)] for m, (a, b) in sorted(mes.items())]
+    porpais = {y: {p: [M(a), M(b)] for p, (a, b) in d.items()} for y, d in pais.items()}
+    return {'unidad': 'millones de USD (expo FOB, impo CIF)', 'columnas': ['mes', 'expo', 'impo'], 'serie': serie,
+            'por_pais_anual': porpais, 'ultimo': serie[-1][0], 'filas': [len(ex), len(im)]}
+
+
 @fuente('indec_api')
 def _indec():
     if not os.environ.get('INDEC_API_TOKEN', '').strip():
@@ -332,16 +416,23 @@ def _indec():
             servicios[n] = {'descripcion': (d.get('description') or '')[:300], 'columnas': list((d.get('properties') or {}).keys())}
     json.dump({'consulta': estado['corrida'], 'servicios': servicios, 'crudo': None if servicios else str(cat)[:4000]},
               open(os.path.join(INDEC_DIR, 'catalogo.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-    # muestra chica de cada servicio para ver columnas y valores
-    muestras, errores = {}, {}
-    for n in servicios:
+    # series que usa el monitor
+    out = {'consulta': estado['corrida'], 'fuente': 'INDEC, API de datos (api.indec.gob.ar)', 'avisos': []}
+    def paso(nombre, fn):
         try:
-            muestras[n] = indec_get(n, ['limit=15'])
+            out[nombre] = fn()
         except Exception as e:
-            errores[n] = str(e)[:200]
-    json.dump({'consulta': estado['corrida'], 'muestras': muestras, 'errores': errores},
-              open(os.path.join(INDEC_DIR, 'muestras.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-    return {'servicios': len(servicios), 'errores': len(errores)}
+            out['avisos'].append(f'{nombre}: {type(e).__name__}: {e}'[:300])
+    paso('ipc', _indec_ipc)
+    paso('emae', _indec_emae)
+    paso('pobreza', _indec_pobreza)
+    paso('comercio', _indec_comercio)
+    json.dump(out, open(os.path.join(INDEC_DIR, 'series.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+    vieja = os.path.join(INDEC_DIR, 'muestras.json')
+    if os.path.exists(vieja):
+        os.remove(vieja)
+    ult = {k: (out[k].get('ultimo') if isinstance(out.get(k), dict) else None) for k in ('ipc', 'emae', 'pobreza', 'comercio')}
+    return {'servicios': len(servicios), 'ultimos': ult, 'avisos': out['avisos']}
 
 
 save('series.json', series)
