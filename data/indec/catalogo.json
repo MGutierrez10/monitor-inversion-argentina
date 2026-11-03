@@ -1,0 +1,311 @@
+{
+ "consulta": "2026-11-03T11:21Z",
+ "servicios": {
+  "ipi_manufacturero": {
+   "descripcion": "Índice de producción industrial manufacturero (IPI manufacturero), nivel general y aperturas por actividad económica, base 2004=100. Incluye las series original, desestacionalizada y tendencia-ciclo, expresadas como números índice y variaciones porcentuales.\n \nEste endpoint contiene información desd",
+   "columnas": [
+    "periodo",
+    "anio",
+    "mes",
+    "indicador",
+    "cuadro_web",
+    "codigo_CLaNAE_2004",
+    "descripcion",
+    "serie",
+    "tipo_de_indicador",
+    "unidad_de_medida",
+    "valor"
+   ]
+  },
+  "ipi_minero": {
+   "descripcion": "IPI minero nivel general. Series original, desestacionalizada y tendencia-ciclo, base 2016=100. Este endpoint contiene información desde enero de 2017. Para más información, se puede consultar la metodología INDEC N° 41, Índice de producción industrial minero, a través del siguiente enlace: https://",
+   "columnas": [
+    "periodo",
+    "anio",
+    "mes",
+    "indicador",
+    "cuadro_web",
+    "codigo_ClaNAE_2010",
+    "codigo_CPC_2_1",
+    "serie",
+    "descripcion",
+    "tipo_de_indicador",
+    "unidad_de_medida",
+    "valor"
+   ]
+  },
+  "estimaciones_poblacion_departamento_2022_2035": {
+   "descripcion": "Estimaciones de población al 1° de julio de cada año calendario, por sexo y departamento, con base en el Censo Nacional de Población, Hogares y Viviendas 2022. Años 2022-2035.   \n\nPara más información, se pueden consultar la siguiente documentación metodológica:  \nhttps://www.indec.gob.ar/ftp/cuadro",
+   "columnas": [
+    "jurisdiccion_cod",
+    "jurisdiccion_nom",
+    "departamento_cod",
+    "departamento_nom",
+    "rmba",
+    "sexo_cod",
+    "sexo_nom",
+    "poblacion",
+    "fecha"
+   ]
+  },
+  "proyecciones_poblacion_jurisdiccion_2022_2040": {
+   "descripcion": "Estimaciones y proyecciones de población al 1° de julio de cada año calendario, por sexo y grupos de edad, con base en el Censo Nacional de Población, Hogares y Viviendas 2022. Jurisdicciones. Años 2022-2040.   \n\nPara más información, se pueden consultar la siguiente documentación metodológica: http",
+   "columnas": [
+    "jurisdiccion_cod",
+    "jurisdiccion_nom",
+    "sexo_cod",
+    "sexo_nom",
+    "edad_cod",
+    "edad_nom",
+    "poblacion",
+    "fecha"
+   ]
+  },
+  "proyecciones_poblacion_nacional_2022_2040": {
+   "descripcion": "Estimaciones y proyecciones de población al 1° de julio de cada año calendario, por sexo y edad, con base en el Censo Nacional de Población, Hogares y Viviendas 2022. Total del país. Años 2022-2040.   \n\nPara más información, se pueden consultar la siguiente documentación metodológica: https://www.in",
+   "columnas": [
+    "edad",
+    "sexo_cod",
+    "sexo_nom",
+    "poblacion",
+    "fecha"
+   ]
+  },
+  "valorizacion_canastas_cba_cbt": {
+   "descripcion": "Valorización mensual de la canasta básica alimentaria (CBA) y de la canasta básica total (CBT) desde abril de 2016. Gran Buenos Aires.\nPara más información, se puede consultar la metodología INDEC N° 22, La medición de la pobreza y la indigencia en la Argentina, a través del siguiente enlace: https:",
+   "columnas": [
+    "clasificador",
+    "nivel",
+    "codigo",
+    "descripcion",
+    "periodo",
+    "anio",
+    "mes",
+    "indicador",
+    "tipo_de_indicador",
+    "tipo_de_indicador_descripcion",
+    "region",
+    "unidad_de_medida",
+    "valor",
+    "observaciones"
+   ]
+  },
+  "ipc_nacional": {
+   "descripcion": "Índice de precios al consumidor (IPC) de la República Argentina, con aperturas por región, división, grupo, clase y subclase, desde diciembre de 2016.\nPara más información, se puede consultar la metodología INDEC N° 32, Índice de precios al consumidor (IPC). Base diciembre 2016=100, a través del sig",
+   "columnas": [
+    "clasificador",
+    "nivel",
+    "codigo",
+    "descripcion",
+    "periodo",
+    "anio",
+    "mes",
+    "indicador",
+    "tipo_de_indicador",
+    "tipo_de_indicador_descripcion",
+    "region",
+    "unidad_de_medida",
+    "valor",
+    "observaciones"
+   ]
+  },
+  "redeterminacion_precios_contratos_obras_publicas": {
+   "descripcion": "Aperturas del índice del costo de la construcción (ICC) y del índice de precios internos básicos al por mayor (IPIB) utilizadas para la redeterminación periódica de precios de contratos de obra pública, según el Decreto 1295/2002.\nTambién incluye indicadores requeridos por el Decreto 634/2003, relat",
+   "columnas": [
+    "indicador",
+    "operativo",
+    "inciso",
+    "descripcion_inciso",
+    "codigo_apertura",
+    "codigo_CPC_1",
+    "codigo_CIUU_3",
+    "clasificador",
+    "nivel",
+    "descripcion",
+    "origen",
+    "periodo",
+    "anio",
+    "mes",
+    "tipo_de_indicador",
+    "tipo_de_indicador_descripcion",
+    "region",
+    "unidad_de_medida",
+    "valor",
+    "observaciones"
+   ]
+  },
+  "sipm_precios_mayoristas": {
+   "descripcion": "El Sistema de índices de precios mayoristas (SIPM) está compuesto por el índice de precios internos al por mayor (IPIM), el índice de precios internos básicos al por mayor (IPIB) y el índice de precios básicos del productor (IPP). Este endpoint contiene información desde diciembre de 2015.\nPara más ",
+   "columnas": [
+    "operativo",
+    "indicador",
+    "clasificador",
+    "nivel",
+    "codigo_apertura",
+    "descripcion",
+    "periodo",
+    "anio",
+    "mes",
+    "tipo_de_indicador",
+    "tipo_de_indicador_descripcion",
+    "region",
+    "unidad_de_medida",
+    "valor",
+    "observaciones"
+   ]
+  },
+  "indice_salarios": {
+   "descripcion": "El índice de salarios estima la evolución de los salarios pagados en la economía aislando el indicador de variaciones relacionadas con conceptos tales como la cantidad de horas trabajadas, descuentos por ausentismo, premios por productividad y todo otro concepto asociado al desempeño o a las caracte",
+   "columnas": [
+    "clasificador",
+    "nivel",
+    "codigo",
+    "descripcion",
+    "periodo",
+    "anio",
+    "mes",
+    "indicador",
+    "tipo_de_indicador",
+    "tipo_de_indicador_descripcion",
+    "unidad_de_medida",
+    "valor",
+    "observaciones"
+   ]
+  },
+  "icc_precios_construccion": {
+   "descripcion": "Índice del costo de la construcción (ICC) en el Gran Buenos Aires, base 1993. \nEste endpoint contiene información desde noviembre de 2015.\nPara más información, se puede consultar la metodología INDEC N°  9, Índice del Costo de la Construcción en el Gran Buenos Aires, base 1993, a través del siguien",
+   "columnas": [
+    "indicador",
+    "codigo_apertura",
+    "codigo_CPC_1",
+    "clasificador",
+    "nivel",
+    "descripcion",
+    "periodo",
+    "anio",
+    "mes",
+    "tipo_de_indicador",
+    "tipo_de_indicador_descripcion",
+    "region",
+    "unidad_de_medida",
+    "valor",
+    "observaciones"
+   ]
+  },
+  "estimador-mensual-de-actividad-economica-nivel-general": {
+   "descripcion": "Estimador mensual de actividad económica (EMAE), nivel general, base 2004=100. Incluye la serie original, desestacionalizada y tendencia-ciclo, expresadas como números índice y variaciones porcentuales.\n\nEste endpoint contiene información desde enero de 2004.\n\nPara más información, se puede consulta",
+   "columnas": [
+    "tipo_de_indicador_descripcion",
+    "anio",
+    "mes",
+    "periodo",
+    "tipo_de_indicador",
+    "valor",
+    "observaciones"
+   ]
+  },
+  "estimador-mensual-de-actividad-economica-sectores": {
+   "descripcion": "Estimador mensual de actividad económica (EMAE) por sector de actividad económica, base 2004=100 (serie original). Incluye números índice y variaciones porcentuales interanuales para cada sector desde enero de 2004.\n\nPara más información, se puede consultar la metodología INDEC N° 20, Estimador Mens",
+   "columnas": [
+    "anio",
+    "mes",
+    "codigo",
+    "descripcion",
+    "periodo",
+    "tipo_de_indicador",
+    "valor",
+    "observaciones"
+   ]
+  },
+  "pobreza_eph": {
+   "descripcion": "Incidencia de la pobreza y la indigencia en hogares y personas a partir de la Encuesta Permanente de Hogares (EPH) para el total de 31 aglomerados urbanos. La información se presenta con frecuencia semestral desde el segundo semestre de 2016.\n\nPara más información, se puede consultar la metodología ",
+   "columnas": [
+    "area_geografica_nom",
+    "area_geografica_cod",
+    "periodo",
+    "anio",
+    "semestre",
+    "tasa_pobreza_hogares",
+    "tasa_pobreza_personas",
+    "tasa_indigencia_hogares",
+    "tasa_indigencia_personas",
+    "observaciones"
+   ]
+  },
+  "mercado_trabajo_eph": {
+   "descripcion": "Principales tasas del mercado de trabajo estimadas a partir de la Encuesta Permanente de Hogares (EPH), correspondientes al total de 31 aglomerados urbanos. Incluye las tasas de actividad, empleo, empleo formal e informal, desocupación, ocupación demandante de empleo y subocupación. La información s",
+   "columnas": [
+    "area_geografica_nom",
+    "area_geografica_cod",
+    "periodo",
+    "anio",
+    "trimestre",
+    "tasa_de_actividad",
+    "tasa_de_empleo",
+    "tasa_de_empleo_formal",
+    "tasa_de_empleo_informal",
+    "tasa_de_desocupacion",
+    "tasa_de_ocupacion_demandante",
+    "tasa_de_subocupacion",
+    "tasa_de_subocupacion_demandante",
+    "tasa_de_subocupacion_no_demandante",
+    "observaciones"
+   ]
+  },
+  "canasta-crianza": {
+   "descripcion": "Valorización mensual de la canasta de crianza de la primera infancia, la niñez y la adolescencia. Está conformada por el costo de los bienes y servicios, y la valorización del tiempo de cuidado. La estimación se realiza para cuatro tramos de edad: menores de 1 año, de 1 a 3 años, de 4 a 5 años y de ",
+   "columnas": [
+    "anio",
+    "Mes",
+    "Periodo",
+    "bys_men1",
+    "cuid_men1",
+    "tot_men1",
+    "bys_1a3",
+    "cuid_1a3",
+    "tot_1a3",
+    "bys_4a5",
+    "cuid_4a5",
+    "tot_4a5",
+    "bys_6a12",
+    "cuid_6a12",
+    "tot_6a12"
+   ]
+  },
+  "comercio_exterior_nomenclaturas": {
+   "descripcion": "Diccionario de códigos y nomenclaturas utilizados en los servicios de datos de comercio exterior de la Dirección Nacional de Estadísticas del Sector Externo y Cuentas Internacionales.\nIncluye los códigos de país, grandes rubros y subrubros de las exportaciones, y los usos económicos y grandes catego",
+   "columnas": [
+    "nombre_columna",
+    "codigo",
+    "codigo_descripcion"
+   ]
+  },
+  "comercio_exterior_exportacion_bienes": {
+   "descripcion": "Exportaciones argentinas de bienes por grandes rubros, subrubros y país de destino desde enero de 1986. Incluye el valor FOB expresado en dólares estadounidenses y el peso neto de las mercaderías expresado en kilogramos. \nLa información se presenta con frecuencia mensual. Se aplican criterios de sup",
+   "columnas": [
+    "Anio",
+    "Mes",
+    "Periodo",
+    "rubro_cod",
+    "subrubro_cod",
+    "pais_cod",
+    "valor_FOB",
+    "Peso_Neto"
+   ]
+  },
+  "comercio_exterior_importacion_bienes": {
+   "descripcion": "Importaciones argentinas de bienes por uso económico, grandes categorías económica y país de origen. Incluye el valor CIF expresado en dólares estadounidenses y el peso neto de las mercaderías expresado en kilogramos. La información se presenta con frecuencia mensual. \n\nEste endpoint contiene inform",
+   "columnas": [
+    "Anio",
+    "Mes",
+    "Periodo",
+    "uso_economico_cod",
+    "gce_cod",
+    "pais_cod",
+    "valor_CIF",
+    "peso_neto"
+   ]
+  }
+ },
+ "crudo": null
+}
